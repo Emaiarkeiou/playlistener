@@ -1,2 +1,2 @@
-# playlistener_django
+# playlistener
 Local Library website written in Django
