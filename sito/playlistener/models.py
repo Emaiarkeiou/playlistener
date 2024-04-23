@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -60,6 +61,7 @@ class Playlist(models.Model):
     cover = models.ImageField(null=True,blank=True)
     desc = models.TextField(max_length=300,null=True,blank=True)
     canzone = models.ManyToManyField(Canzone)
+    utente = models.ForeignKey(User, on_delete=models.CASCADE)  
 
     class Meta:
         ordering = ['nome']

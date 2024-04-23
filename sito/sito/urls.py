@@ -28,5 +28,5 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),                                # Admin
     path('playlistener/', include('playlistener.urls')),            # Use include() to add paths from the application  
-    path('', RedirectView.as_view(url='playlistener/')),            # To redirect the url
+    path('', RedirectView.as_view(url='playlistener/login/')),          # To redirect the url
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) # Use static() to add URL mapping to serve static files during development (only)

@@ -2,13 +2,16 @@ from django.urls import path
 from . import views
 
 """
-playlistener/
 playlistener/login
-playlistener/signin
-playlistener/user/<name>/
-playlistener/user/<name>/playlist/<id><nome>
+playlistener/signup
+playlistener/user/<username>/
+playlistener/user/<username>/playlist/<id><nome>
 
 """
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('login/', views.loginView, name='loginView'),
+    path('loggingin/', views.loginReq, name='login'),
+    path('loggingout/', views.logoutReq, name='logout'),
+    path('signup/', views.signup, name='signup'),
+    path('user/<str:username>', views.user, name='user'),
 ]

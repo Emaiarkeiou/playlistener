@@ -24,12 +24,12 @@
                 <div class="col-12 col-sm-5 min-vh-100 
                     d-flex align-items-center justify-content-center flex-column
                     bg-white">
-                    
+                    {% block content %}
                     <div class="d-flex justify-content-center">
-                        {% block form_title %}<h1>Login</h1>{% endblock %}
+                        {% block form_title %}{% endblock %}
                     </div>
                     <div class="d-flex justify-content-center">
-                        {% block content %}a{% endblock %}
+                        
                     </div>
                     <div class="d-flex justify-content-center">
                         {% block contenta %}a{% endblock %}
@@ -37,6 +37,7 @@
                     <div class="d-flex justify-content-center">
                         {% block contents %}a{% endblock %}
                     </div>
+                    {% endblock %}
                 </div>
             </div>
       </div>
