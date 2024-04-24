@@ -3,6 +3,14 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+class Utente(models.Model):
+    """Estensione User"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    cover = models.ImageField(null=True,blank=True)
+
+    def __str__(self):
+        return self.user.username
+
 class Album(models.Model):
     """Album"""
     
@@ -61,7 +69,11 @@ class Playlist(models.Model):
     cover = models.ImageField(null=True,blank=True)
     desc = models.TextField(max_length=300,null=True,blank=True)
     canzone = models.ManyToManyField(Canzone)
-    utente = models.ForeignKey(User, on_delete=models.CASCADE)  
+
+    #Playlist ha 2 attributi nel DB per indicare lo user collegato:
+    # user: serve per fare un collegamento con Utente, es: con user.utente.cover riesco a prendere l'immagine
+    # user_id: serve per confrontare solo l'id dello user collegato
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  
 
     class Meta:
         ordering = ['nome']

@@ -30,16 +30,20 @@ def signup(request):
 
 def user(request,username):
     """View function for home page of site."""
-    if not request.user.is_authentSicated:
+    if not request.user.is_authenticated:
         return HttpResponseRedirect('/')
     else:
         """ 
         
         
-        SERVE AGGIUNGERE UN CUSTOM USER, CON IMMAGINE
+        DEVO AGGIUNGERE SE POSSIBILE LE IMMAGINI NEL DATABASEEEEEEEEEEE
+        EEEEEEEEEEEEEE
+        EEEE
+        E
+
         
         
         """
         utente = User.objects.get(username=username) 
-        lista_playlist = Playlist.objects.filter(utente=utente.id)
-        return render(request, 'user.html', context={"username":username,"playlists":lista_playlist})
+        lista_playlist = Playlist.objects.filter(user_id=utente.id)
+        return render(request, 'user.html', context={"username":username,"playlists":lista_playlist,"prova":lista_playlist[0].user})
