@@ -74,10 +74,16 @@ class Playlist(models.Model):
     # user: serve per fare un collegamento con Utente, es: con user.utente.cover riesco a prendere l'immagine
     # user_id: serve per confrontare solo l'id dello user collegato
     user = models.ForeignKey(User, on_delete=models.CASCADE)  
-
+    """
+    
+    AGGIUNGERE METODO CHE ELIMINA LA FOTO
+    
+    
+    """
     class Meta:
         ordering = ['nome']
 
     #Metodi
     def __str__(self):
         return self.nome
+    

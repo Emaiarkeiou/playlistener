@@ -5,7 +5,7 @@
  {% if user.is_authenticated %}
    <li>User: {{ user.get_username }}</li>
    {% for playlist in playlists %}
-    <li>{{ playlist }},{{ prova }}</li>
+    <li>{{ playlist }}</li>
    {% endfor %}
    <li>
      <form id="logout-form" method="post" action="{% url 'logout' %}">

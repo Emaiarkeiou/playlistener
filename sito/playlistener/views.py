@@ -8,42 +8,63 @@ from .models import Album, Artista, Canzone, Playlist
 
 def loginView(request):
     """View function for home page of site."""
-    return render(request, 'login.html', context={"a":2})
-
-def loginReq(request):
-    username = request.POST['username']
-    password = request.POST['password']
-    user = authenticate(username=username, password=password)
-    if user is not None:
-        login(request, user)
-        return HttpResponseRedirect('/playlistener/user/' + username) 
+    if request.method == 'GET':
+        """ GET della pagina di login """
+        return render(request, 'registration/login.html')
+    elif request.method == 'POST':
+        """ POST della form di login """
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return HttpResponseRedirect('/playlistener/user/' + username) 
+        else:
+            return HttpResponseRedirect('/playlistener/login/')
     else:
-        return render(request, 'login.html', context={"a":2})
+        pass
+    """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""
 
-def logoutReq(request):
-    logout(request)
-    return HttpResponseRedirect('/')
 
-def signup(request):
+def signupView(request):
     """View function for home page of site."""
-    return render(request, 'login.html', context={"a":2})
+    if request.method == 'GET':
+        """ GET della pagina di singup """
+        return render(request, 'registration/signup.html')
+    elif request.method == 'POST':
+        """ POST della form di sign up """
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return HttpResponseRedirect('/playlistener/user/' + username) 
+        else:
+            return HttpResponseRedirect('/playlistener/login/')
+    else:
+        pass
+    """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""
+
+def logoutView(request):
+    if request.method == 'POST':
+        logout(request)
+        return HttpResponseRedirect('/')
+    else:
+        pass
+        """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""
+
 
 def user(request,username):
     """View function for home page of site."""
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect('/')
+    if request.method == 'GET':
+        if request.user.is_authenticated:
+            if request.user.username == username:
+                utente = User.objects.get(username=username) 
+                lista_playlist = Playlist.objects.filter(user_id=utente.id)
+                return render(request, 'user.html', context={"username":username,"playlists":lista_playlist})
+            else:
+                """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""
+                return HttpResponseRedirect('/')
     else:
-        """ 
-        
-        
-        DEVO AGGIUNGERE SE POSSIBILE LE IMMAGINI NEL DATABASEEEEEEEEEEE
-        EEEEEEEEEEEEEE
-        EEEE
-        E
-
-        
-        
-        """
-        utente = User.objects.get(username=username) 
-        lista_playlist = Playlist.objects.filter(user_id=utente.id)
-        return render(request, 'user.html', context={"username":username,"playlists":lista_playlist,"prova":lista_playlist[0].user})
+        pass
+        """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""

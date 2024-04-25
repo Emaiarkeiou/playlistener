@@ -1,0 +1,116 @@
+label {
+    color:gray;
+}
+
+#switch {
+    color: gray;
+}
+
+
+#gradient {
+    background: 
+    radial-gradient(
+      60% 40% at 0% 0%,
+      rgba(0, 168, 107, 1),
+      transparent 
+    ),
+    radial-gradient(
+      85% 80% at 0% 30%,
+      rgba(0, 168, 107, 1),
+      transparent 
+    ),
+    radial-gradient(
+      75% 75% at 50% 100%,
+      rgba(125, 249, 255, 1),
+      transparent 
+    ),
+    radial-gradient(
+      75% 75% at 0% 100%,
+      rgba(18, 53, 36, 1) 20%,
+      transparent 
+    ),
+    radial-gradient(
+      70% 70% at 100% 0%,
+      rgba(40, 98, 91, 1),
+      transparent 
+    ),
+    radial-gradient(
+      65% 65% at 100% 100%,
+      rgba(127, 255, 212, 1),
+      transparent 
+    ),
+    radial-gradient(
+      50% 50% at 40% 0%,
+      rgba(71, 135, 120, 1),
+      transparent 
+    ),
+    radial-gradient(
+      50% 50% at 70% 0%,
+      rgba(0, 128, 128, 1),
+      transparent 
+    ),
+    radial-gradient(
+      50% 50% at 25% 100%,
+      rgba(64, 130, 109, 1),
+      transparent 
+    ),
+    radial-gradient(
+      20% 50% at 0% 70%,
+      rgba(9, 121, 105, 1),
+      transparent 
+    ),
+    radial-gradient(
+      50% 50% at 100% 30%,
+      rgba(95, 158, 160, 1),
+      transparent 
+    ),
+    radial-gradient(
+      30% 30% at 35% 30%,
+      rgba(64, 181, 173, 1),
+      transparent 
+    ),
+    radial-gradient(
+      30% 30% at 65% 70%,
+      rgba(64, 181, 173, 1),
+      transparent 
+    ),
+    radial-gradient(
+      40% 40% at 100% 55%,
+      rgba(64, 181, 173, 1),
+      transparent 
+    ),
+    radial-gradient(
+      35% 35% at 50% 50%,
+      rgba(64, 181, 173, 1),
+      transparent 
+    ),
+    radial-gradient(
+      25% 25% at 20% 50%,
+      rgba(64, 181, 173, 1),
+      transparent 
+    )
+    
+}
+
+/*  18, 53, 36
+    40, 98, 91
+    71, 135, 120
+    0, 168, 107
+    127, 255, 212
+    125, 249, 255 
+    
+    0, 128, 128
+    64, 130, 109
+    9, 121, 105
+    95, 158, 160
+
+    64, 181, 173
+    */
+
+#div_login {
+    background:rgba(255, 255, 255, 0.75);
+}
+
+#div_form {
+    background:rgba(255, 255, 255, 0.9);
+}

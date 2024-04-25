@@ -1,0 +1,51 @@
+{% extends "./base.html" %}
+
+{% block title %}
+  <title>PlayListener - Signup</title>
+{% endblock %}
+
+
+
+{% block content %}
+
+  {% if form.errors %}
+    <p>Your username and password didn't match. Please try again.</p>
+  {% endif %}
+
+  <form class="col-8 border rounded p-4" id="div_form" method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+    {% load static %}
+    <div class="row text-start">
+      <img class="img-fluid mb-3" src="{% static 'images/testo_logo.png' %}" alt="Logo">
+    </div>
+
+    <div class="form-floating mt-3">
+      <input type="text" name="first_name" maxlength="50" placeholder="" class="form-control" id="inputNome">
+      <label for="inputNome">Nome</label>
+    </div>
+    <div class="form-floating mt-3">
+      <input type="text" name="last_name" maxlength="50" placeholder="" class="form-control" id="inputCognome">
+      <label for="inputCognome">Cognome</label>
+    </div>
+
+    <div class="form-floating mt-3">
+      <input type="text" name="username" maxlength="50" placeholder="" class="form-control" id="inputUsername">
+      <label for="inputUsername">Nome utente</label>
+    </div>
+
+    <div class="form-floating mt-3">
+      <input type="password" name="password" maxlength="50" placeholder="" class="form-control" id="inputPassword">
+      <label for="inputPassword">Password</label>
+    </div>
+
+    <div class="mt-4">
+      <p class="text-end w-100" id="switch">Hai già un account? <a href="{% url 'login' %}">Accedi</a></p>
+    </div>
+
+    <div class="mt-4">
+      <button type="submit" class="btn btn-primary py-2 btn-block w-100 h-100"><b>Iscriviti</b></button>
+    </div>
+    
+  </form>
+
+{% endblock %}
