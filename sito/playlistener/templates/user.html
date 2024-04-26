@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block profile_menu %}
+  {{ user.get_username }}
+
+{% endblock %}
+
 {% block content %}
 <ul class="sidebar-nav">
  {% if user.is_authenticated %}
