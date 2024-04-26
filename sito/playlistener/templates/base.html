@@ -17,30 +17,37 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   </head>
 
-  <body>
+  <body id="gradient">
+    <!-- navbar 6.5vh -->
+    <nav class="custom_shadow navbar navbar-light navbar-expand fixed-top p-0 justify-content-center">
 
-    <nav class="shadow navbar navbar-light bg-white navbar-expand sticky-top p-0 justify-content-center">
-      <div class="container px-3 ">
+      <div class="container-xl px-3 ">
 
-        <div class="navbar-brand d-flex w-25" style="height: 4.5vh;">
+        <div class="navbar-brand d-flex w-25" style="height: 5.5vh;">
           <img class="img-fluid" src="{% static 'images/logo.png' %}" alt="Logo">
           <img class="img-fluid" src="{% static 'images/testo_logo.png' %}" alt="Logo">
         </div>
 
-        <ul class="navbar-nav ms-auto w-75 justify-content-end py-2" >
+        <ul class="navbar-nav ms-auto w-75 justify-content-end py-2">
 
           <li class="nav-item dropdown">
 
             <a class="nav-link p-0" role="button" data-bs-toggle="dropdown"  aria-expanded="false">
-              <div class="rounded border p-2">
+              <div class="rounded border bg-white p-2">
               {% block profile_menu %}a{% endblock %}
               </div>
             </a>
             
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="#">Profilo Utente</a></li>
+              <li><a class="dropdown-item" href="{{ user.get_username }}">Pagina Utente</a></li>
               <li><hr class="dropdown-divider mx-2"></li>
-              <li><a class="dropdown-item" href="#">Log out</a></li>
+              <li><a class="dropdown-item" href="#">Modifica Utente</a></li>
+              <li>
+                <form  method="post" action="{% url 'logout' %}">
+                  {% csrf_token %}
+                  <input class="dropdown-item" type="submit" value="Log out">
+                </form>
+              </li>
             </ul>
             
           </li>
@@ -50,27 +57,25 @@
       </div>
     </nav>
     
-
-      <div class="shadow d-flex col-12 vh-25">
-        <div class="shadow container p-0 d-flex justify-content-center">
-          <div class="col-sm-12">
-            <div class="d-flex justify-content-center col-sm-12">
-              {% block content %}a{% endblock %}
+      
+      <div class="d-flex col-12" style="height:40vh;">
+        <div class="custom_shadow container-xl bg-white p-0 d-flex justify-content-center">
+          <div class="d-flex col-sm-12 align-items-end">
+            <div class="d-flex justify-content-center col-sm-12" style="height:33.5vh;">
+              {% block header %}a{% endblock %}
             </div>
           </div>
         </div>
       </div>
 
-      <div id="gradient" class="d-flex col-12 min-vh-100">
-        <div>
-        <div class="container p-0 d-flex justify-content-center bg-white" >
-          <div class="col-sm-12">
-            <div class="d-flex justify-content-center col-sm-12">
-              a
+      <div class="col-12">
+          <div class="custom_shadow bg-white container-xl p-0 d-flex justify-content-center" style="min-height:100vh;">
+            <div class="col-sm-12 ">
+              <div class="d-flex justify-content-center col-sm-12">
+                a
+              </div>
             </div>
-          </div>
         </div>
-      </div>
       </div>
 
   </body>

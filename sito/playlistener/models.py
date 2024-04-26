@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class Utente(models.Model):
     """Estensione User"""
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    cover = models.ImageField(null=True,blank=True)
+    pfp = models.ImageField(null=True,blank=True)
 
     def __str__(self):
         return self.user.username

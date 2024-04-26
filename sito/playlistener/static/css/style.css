@@ -89,7 +89,6 @@ label {
       rgba(64, 181, 173, 1),
       transparent 
     )
-    
 }
 
 /*  18, 53, 36
@@ -108,9 +107,23 @@ label {
     */
 
 #div_login {
-    background:rgba(255, 255, 255, 0.75);
+  background: rgba(255,255,255, 0.7);
 }
 
 #div_form {
     background:rgba(255, 255, 255, 0.9);
+}
+
+.custom_shadow {
+  box-shadow: 0 0 5px rgba(0,0,0,.05), 2px 2px 5px rgba(0,0,0,.1);
+}
+
+.custom_shadow_left {
+  box-shadow: 0 0 5px rgba(0,0,0,.05), 2px 2px 5px rgba(0,0,0,.1);
+  clip-path: inset(0px 0px 0px -20px);
+}
+
+nav {
+  height:6.5vh ;
+  background: rgba(255,255,255, 0.85);
 }

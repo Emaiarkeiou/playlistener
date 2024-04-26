@@ -6,6 +6,17 @@ from django.contrib.auth import authenticate, login, logout
 
 from .models import Album, Artista, Canzone, Playlist
 
+
+"""
+
+GET PER I LINK/REDIRECT
+POST PER LE FORM E BOTTONI SUBMIT(per input)
+
+
+"""
+
+
+
 def loginView(request):
     """View function for home page of site."""
     if request.method == 'GET':
