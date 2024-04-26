@@ -12,7 +12,7 @@
     <p>Your username and password didn't match. Please try again.</p>
   {% endif %}
 
-  <form class="col-8 border rounded p-4" id="div_form" method="post" action="{% url 'login' %}">
+  <form class="col-8 border rounded p-4" id="div_form" method="post" action="{% url 'signup' %}">
     {% csrf_token %}
     {% load static %}
     <div class="row text-start">
@@ -29,7 +29,7 @@
     </div>
 
     <div class="form-floating mt-3">
-      <input type="text" name="username" maxlength="50" placeholder="" class="form-control" id="inputUsername">
+      <input type="text" name="username" maxlength="50" placeholder="" class="form-control text-lowercase" id="inputUsername">
       <label for="inputUsername">Nome utente</label>
     </div>
 

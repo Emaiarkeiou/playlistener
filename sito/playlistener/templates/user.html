@@ -1,15 +1,75 @@
 {% extends "base.html" %}
+{% load static %}
+
 
 {% block profile_menu %}
+  
+  {% if user.utente.pfp %}
+    <img src="{{ user.utente.pfp }}" class="img-fluid rounded-circle me-2" alt="PFP" style="height: 3vh;">
+  {% else %}
+    <img src="{% static 'images/pfp_empty.png' %}" class="img-fluid rounded-circle me-2" alt="PFP" style="height:3vh;">
+  {% endif %}
+
   {{ user.get_username }}
+
 {% endblock %}
 
-{% load static %}
+
 {% block header %}
-<div class="d-flex align-items-center justify-content-center col-3 p-4 bg-success">
-  <img src="{% static 'images/pfp_empty.png' %}" class="p-4 img-fluid rounded-circle" alt="PFP">
+
+<div class="d-flex align-items-center justify-content-center col-3 p-4">
+
+  {% if user.utente.pfp %}
+    <img src="{{ user.utente.pfp }}" class="p-4 img-fluid rounded-circle" alt="PFP">
+  {% else %}
+    <img src="{% static 'images/pfp_empty.png' %}" class="p-4 img-fluid rounded-circle" alt="PFP">
+  {% endif %}
+
 </div>
-<div class="col-3">a</div>
-<div class="col-3">a</div>
-<div class="col-3">a</div>
+
+<div class="d-flex justify-content-start col-3 pe-4 my-4 ">
+  <div class="py-4 overflow-hidden text-nowrap">
+    <h4 class="m-0 text-capitalize">{{ user.get_full_name }}</h4>
+    <h5 class="">@{{ user.get_username }}</h5>
+  </div>
+</div>
+
+<div class="d-flex align-items-center flex-column col-6 px-4 my-4 border-start">
+
+  <div class="mb-auto pt-4 col-11">
+    <div class="input-group">
+      <input type="text" class="form-control py-2" placeholder="Playlist">
+      <div class="input-group-append">
+        <button class="btn btn-primary py-2" type="button">Cerca</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="d-flex pb-4 col-11">
+    <div class="d-flex justify-content-start col-6">
+      <form class="col-11" method="get" action="{% url 'login' %}">
+        <button type="submit" class="btn btn-success py-2 col-12"><b>Aggiungi Playlist</b></button>
+      </form>
+    </div>
+    <div class="d-flex justify-content-end col-6">
+      <form class="col-11" method="get" action="{% url 'login' %}">
+        <button type="submit" class="btn btn-danger py-2 col-12"><b>Elimina Playlist</b></button>
+      </form>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block content %}
+
+{% for playlist in playlists %}
+    <p>{{ playlist.nome }}</p>
+{% endfor %}
+
 {% endblock %}

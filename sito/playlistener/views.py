@@ -1,10 +1,10 @@
-from django.shortcuts import render, HttpResponseRedirect
+from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 
 # Create your views here.
 
-from .models import Album, Artista, Canzone, Playlist
+from .models import Album, Artista, Canzone, Playlist, Utente
 
 
 """
@@ -24,14 +24,14 @@ def loginView(request):
         return render(request, 'registration/login.html')
     elif request.method == 'POST':
         """ POST della form di login """
-        username = request.POST['username']
+        username = request.POST['username'].lower()
         password = request.POST['password']
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect('/playlistener/user/' + username) 
+            return redirect(userView, username=username) 
         else:
-            return HttpResponseRedirect('/playlistener/login/')
+            return redirect(loginView)
     else:
         pass
     """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""
@@ -44,14 +44,19 @@ def signupView(request):
         return render(request, 'registration/signup.html')
     elif request.method == 'POST':
         """ POST della form di sign up """
-        username = request.POST['username']
+        nome = request.POST['first_name']
+        cognome = request.POST['last_name']
+        username = request.POST['username'].lower()
         password = request.POST['password']
-        user = authenticate(username=username, password=password)
-        if user is not None:
+        if nome and cognome and username and password:
+            User.objects.create_user(username=username, password=password, first_name=nome, last_name=cognome)
+            user = authenticate(username=username, password=password)
+            Utente.objects.create(user=user)
             login(request, user)
-            return HttpResponseRedirect('/playlistener/user/' + username) 
+            return redirect(userView, username=username)
         else:
-            return HttpResponseRedirect('/playlistener/login/')
+            return redirect(signupView)
+
     else:
         pass
     """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""
@@ -59,13 +64,13 @@ def signupView(request):
 def logoutView(request):
     if request.method == 'POST':
         logout(request)
-        return HttpResponseRedirect('/')
+        return redirect(loginView)
     else:
         pass
         """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""
 
 
-def user(request,username):
+def userView(request,username):
     """View function for home page of site."""
     if request.method == 'GET':
         if request.user.is_authenticated:
@@ -75,7 +80,9 @@ def user(request,username):
                 return render(request, 'user.html', context={"username":username,"playlists":lista_playlist})
             else:
                 """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""
-                return HttpResponseRedirect('/')
+                return redirect(loginView)
+        else:
+            return redirect(loginView)
     else:
         pass
         """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""

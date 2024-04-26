@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 class Utente(models.Model):
-    """Estensione User"""
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     pfp = models.ImageField(null=True,blank=True)
 
