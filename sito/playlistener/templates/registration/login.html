@@ -18,7 +18,7 @@
     </div>
 
     <div class="form-floating mt-3">
-      <input type="text" name="username" maxlength="30" placeholder="" class="form-control text-lowercase" id="inputUsername">
+      <input type="text" name="username" maxlength="30" placeholder="" class="form-control text-lowercase" id="inputUsername" value="{{ username }}">
       <label for="inputUsername">Nome utente</label>
     </div>
 
@@ -28,7 +28,7 @@
     </div>
 
     <div class="mt-2 px-2">
-      <p class="text-start m-0 p-0 text-danger w-100">{{ error }}&nbsp;</p>
+      <p class="text-start m-0 p-0 text-danger w-100">{{error}} &nbsp;</p>
     </div>
 
     <div class="mt-2">

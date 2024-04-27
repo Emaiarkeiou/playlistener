@@ -17,18 +17,44 @@
 
 {% block header %}
 
-<div class="d-flex align-items-center justify-content-center col-3 p-4">
 
-  {% if user.utente.pfp %}
-    <img src="{{ user.utente.pfp }}" class="p-4 img-fluid rounded-circle" alt="PFP">
-  {% else %}
-    <img src="{% static 'images/pfp_empty.png' %}" class="p-4 img-fluid rounded-circle" alt="PFP">
-  {% endif %}
+<div class="d-flex justify-content-center col-3 p-4">
+  <div class="d-flex p-4">
+    <a href="#exampleModal" data-bs-toggle="modal" data-bs-target="#exampleModal" class="d-flex">
+      {% if user.utente.pfp %}
+        <img src="{{ user.utente.pfp }}" class="img-fluid rounded-circle border" alt="PFP">
+      {% else %}
+        <img src="{% static 'images/pfp_empty.png' %}" class="img-fluid rounded-circle border" alt="PFP">
+      {% endif %}
+      </a>
+  </div>
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header justify-content-center p-2">
+          <h1 class="modal-title text-center fs-5" id="exampleModalLabel">Immagine Profilo</h1>
+        </div>
+        <div class="row modal-body d-flex justify-content-center text-center p-0 m-0">
+          <div class="d-flex col-12 p-0">
+            <form  method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <input class="dropdown-item" type="submit" value="Log out">
+            </form>
+          <a href="#exampleModa" data-bs-dismiss="modal" class="d-flex justify-content-center selected col-12 mt-2">aa</a></div>
+          <div class="d-flex col-12 p-0">
+            <a href="#exampleModa" data-bs-dismiss="modal" class="d-flex justify-content-center selected col-12 mt-2">aa</a></div>
+        </div>
+        <div class="modal-footer justify-content-center p-0 mt-2">
+          <a href="" data-bs-dismiss="modal" class="selected text-center text-reset text-decoration-none col-12 my-2">Annulla</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
 
-</div>
-
-<div class="d-flex justify-content-start col-3 pe-4 my-4 ">
-  <div class="py-4 overflow-hidden text-nowrap">
+<div class="d-flex justify-content-start col-3 pe-4 py-4">
+  <div class="py-4 text-truncate me-4">
     <h4 class="m-0 text-capitalize">{{ user.get_full_name }}</h4>
     <h5 class="">@{{ user.get_username }}</h5>
   </div>
@@ -73,3 +99,4 @@
 {% endfor %}
 
 {% endblock %}
+
