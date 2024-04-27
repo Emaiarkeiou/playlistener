@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.views.decorators.cache import cache_control
-
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 
 # Create your views here.
 
@@ -96,13 +97,30 @@ def logoutView(request):
 @cache_control(must_revalidate=True, no_store=True)
 def userView(request,username):
     """View function for home page of site."""
-    if request.method == 'GET': #get_object_or_404(MyModel, pk=1)
-        if request.user.is_authenticated:
-            if request.user.username == username:
-                utente = User.objects.get(username=username) 
-                lista_playlist = Playlist.objects.filter(user_id=utente.id)
-                return render(request, 'user.html', context={"username":username,"playlists":lista_playlist})
-        return redirect(loginView)
-    else:
-        pass
-        """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""
+    if request.user.is_authenticated:
+        if request.user.username == username:
+            user = User.objects.get(username=username)
+            lista_playlist = Playlist.objects.filter(user_id=user.id)
+            if request.method == 'GET':
+                return render(request, 'user.html', context={"playlists":lista_playlist,'media_root': settings.MEDIA_URL})
+            elif request.method == 'POST':
+
+                if request.POST['_method'] == 'PUT':
+                    image = request.POST['image']
+                    user.utente.pfp = image                 
+                    
+                    
+                    """PROBLEMA REFRESH PAGINA ; GUARDA SALVATI"""
+
+                    """ UPLOAD IMMAGINE CON FORM AS CLASS ; GUARDA VIDEO SALVATO"""
+
+                    user.utente.save()
+                    return render(request, 'user.html', context={"playlists":lista_playlist,"prova":image,'media_root': settings.MEDIA_URL})
+                
+                elif request.POST['_method'] == 'DELETE':
+                    user.utente.pfp = ""
+                    user.utente.save()
+                    return render(request, 'user.html', context={"playlists":lista_playlist,'media_root': settings.MEDIA_URL,"prova":"zzz"})
+                
+    return redirect(loginView)
+

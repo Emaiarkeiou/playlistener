@@ -5,7 +5,7 @@
 {% block profile_menu %}
   
   {% if user.utente.pfp %}
-    <img src="{{ user.utente.pfp }}" class="img-fluid rounded-circle me-2" alt="PFP" style="height: 3vh;">
+    <img src="{{ media_root }}{{ user.utente.pfp }}" class="img-fluid rounded-circle me-2" alt="PFP" style="height: 3vh;">
   {% else %}
     <img src="{% static 'images/pfp_empty.png' %}" class="img-fluid rounded-circle me-2" alt="PFP" style="height:3vh;">
   {% endif %}
@@ -22,7 +22,7 @@
   <div class="d-flex p-4">
     <a href="#exampleModal" data-bs-toggle="modal" data-bs-target="#exampleModal" class="d-flex">
       {% if user.utente.pfp %}
-        <img src="{{ user.utente.pfp }}" class="img-fluid rounded-circle border" alt="PFP">
+        <img src="{{ media_root }}{{ user.utente.pfp }}" class="img-fluid rounded-circle border" alt="PFP">
       {% else %}
         <img src="{% static 'images/pfp_empty.png' %}" class="img-fluid rounded-circle border" alt="PFP">
       {% endif %}
@@ -37,13 +37,29 @@
         </div>
         <div class="row modal-body d-flex justify-content-center text-center p-0 m-0">
           <div class="d-flex col-12 p-0">
-            <form  method="post" action="{% url 'logout' %}">
+
+            <form  method="post" action="{{ request.path }}" enctype="multipart/form-data" class="d-flex justify-content-center selected col-12 mt-2">
               {% csrf_token %}
-              <input class="dropdown-item" type="submit" value="Log out">
+              <input type="hidden" name="_method" value="PUT">
+              <label class="text-reset col-12">
+                <input type="file" class="hide" onchange="form.submit()" name="image" accept="image/*" />
+                Importa
+              </label>
             </form>
-          <a href="#exampleModa" data-bs-dismiss="modal" class="d-flex justify-content-center selected col-12 mt-2">aa</a></div>
+
+          </div>
           <div class="d-flex col-12 p-0">
-            <a href="#exampleModa" data-bs-dismiss="modal" class="d-flex justify-content-center selected col-12 mt-2">aa</a></div>
+
+            <form  method="post" action="{{ request.path }}" class="d-flex justify-content-center selected col-12 mt-2">
+              {% csrf_token %}
+              <input type="hidden" name="_method" value="DELETE">
+              <label class="text-reset col-12">
+                <input type="submit" class="hide"/>
+                Elimina
+              </label>
+            </form>
+
+          </div>
         </div>
         <div class="modal-footer justify-content-center p-0 mt-2">
           <a href="" data-bs-dismiss="modal" class="selected text-center text-reset text-decoration-none col-12 my-2">Annulla</a>
@@ -97,6 +113,10 @@
 {% for playlist in playlists %}
     <p>{{ playlist.nome }}</p>
 {% endfor %}
+
+{{user.utente.pfp}}
+
+{{prova}}
 
 {% endblock %}
 

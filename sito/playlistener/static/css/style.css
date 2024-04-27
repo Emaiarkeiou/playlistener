@@ -128,10 +128,12 @@ nav {
   background: rgba(255,255,255, 0.85);
 }
 
-input[type="file"] {
+.hide {
   display: none;
-  background-color: red;
 }
+
+
+
 
 .selected:hover {
   background-color: #f8f9fa;
