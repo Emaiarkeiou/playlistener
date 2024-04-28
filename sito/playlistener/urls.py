@@ -11,6 +11,7 @@ playlistener/user/<username>/playlist/<id><nome>
 urlpatterns = [
     path('login/', views.loginView, name='login'),
     path('signup/', views.signupView, name='signup'),
+    path('edit/', views.editView, name='edit'),
     path('logout/', views.logoutView, name='logout'),
     path('user/<str:username>', views.userView, name='user'),
 ]

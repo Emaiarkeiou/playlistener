@@ -41,7 +41,7 @@
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="{{ user.get_username }}">Pagina Utente</a></li>
               <li><hr class="dropdown-divider mx-2"></li>
-              <li><a class="dropdown-item" href="#">Modifica Utente</a></li>
+              <li><a class="dropdown-item" href="{% url 'edit' %}">Modifica Utente</a></li>
               <li>
                 <form  method="post" action="{% url 'logout' %}">
                   {% csrf_token %}

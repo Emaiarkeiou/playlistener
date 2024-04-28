@@ -41,19 +41,24 @@
             <form  method="post" action="{{ request.path }}" enctype="multipart/form-data" class="d-flex justify-content-center selected col-12 mt-2">
               {% csrf_token %}
               <input type="hidden" name="_method" value="PUT">
-              <label class="text-reset col-12">
-                <input type="file" class="hide" onchange="form.submit()" name="image" accept="image/*" />
+
+              <label class="text-primary col-12">
+                {{ form.pfp }}
                 Importa
               </label>
+
             </form>
 
           </div>
+          <div class="mx-2">
+            <hr class="my-2" style="border-top: 1px solid gray;">
+          </div>
           <div class="d-flex col-12 p-0">
 
-            <form  method="post" action="{{ request.path }}" class="d-flex justify-content-center selected col-12 mt-2">
+            <form  method="post" action="{{ request.path }}" class="d-flex justify-content-center selected col-12 ">
               {% csrf_token %}
               <input type="hidden" name="_method" value="DELETE">
-              <label class="text-reset col-12">
+              <label class="text-danger col-12">
                 <input type="submit" class="hide"/>
                 Elimina
               </label>

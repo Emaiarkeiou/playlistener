@@ -1,0 +1,55 @@
+{% extends "./base.html" %}
+
+{% block title %}
+  <title>PlayListener - Edit</title>
+{% endblock %}
+
+
+
+{% block content %}
+
+  {% if form.errors %}
+    <p>Your username and password didn't match. Please try again.</p>
+  {% endif %}
+
+  <form class="col-8 border rounded p-4" id="div_form" method="post" action="{% url 'signup' %}">
+    {% csrf_token %}
+    {% load static %}
+    <div class="row text-start">
+      <img class="img-fluid mb-3" src="{% static 'images/testo_logo.png' %}" alt="Logo">
+    </div>
+
+    <div class="form-floating mt-3">
+      <input type="text" name="first_name" maxlength="30" placeholder="" class="form-control" id="inputNome" value="{{ first_name }}">
+      <label for="inputNome">Nome</label>
+    </div>
+    <div class="form-floating mt-3">
+      <input type="text" name="last_name" maxlength="30" placeholder="" class="form-control" id="inputCognome" value="{{ last_name }}">
+      <label for="inputCognome">Cognome</label>
+    </div>
+
+    <div class="form-floating mt-3">
+      <input type="text" name="username" maxlength="30" placeholder="" class="form-control text-lowercase" id="inputUsername" value="{{ username }}">
+      <label for="inputUsername">Nome utente</label>
+    </div>
+
+    <div class="form-floating mt-3">
+      <input type="password" name="password" maxlength="30" placeholder="" class="form-control" id="inputPassword" value="{{ password }}">
+      <label for="inputPassword">Password</label>
+    </div>
+
+    <div class="mt-2 px-2">
+      <p class="text-start m-0 p-0 text-danger w-100">{{ error }}&nbsp;</p>
+    </div>
+
+    <div class="mt-2">
+      <button type="submit" class="btn btn-primary py-2 btn-block w-100 h-100"><b>Salva</b></button>
+    </div>
+
+    <div class="mt-2 px-2">
+      <p class="text-end m-0 p-0 w-100" id="switch">&nbsp;</p>
+    </div>
+    
+  </form>
+
+{% endblock %}
