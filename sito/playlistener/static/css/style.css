@@ -139,6 +139,14 @@ nav {
   background-color: #f8f9fa;
 }
 
+.selected:target {
+  background-color: #000000;
+}
+
 .modal-backdrop {
   opacity:0.1 !important;
+}
+
+.navbar {
+  padding-right: inherit !important;
 }

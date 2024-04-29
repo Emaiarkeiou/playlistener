@@ -44,7 +44,7 @@
 
               <label class="text-primary col-12">
                 {{ form.pfp }}
-                Importa
+                <h6 class="m-0 p-1">Importa</h6>
               </label>
 
             </form>
@@ -55,19 +55,19 @@
           </div>
           <div class="d-flex col-12 p-0">
 
-            <form  method="post" action="{{ request.path }}" class="d-flex justify-content-center selected col-12 ">
+            <form  method="post" action="{{ request.path }}" class="d-flex p-0 justify-content-center selected col-12 ">
               {% csrf_token %}
               <input type="hidden" name="_method" value="DELETE">
-              <label class="text-danger col-12">
+              <label class="text-danger col-12 p-0">
                 <input type="submit" class="hide"/>
-                Elimina
+                <h6 class="m-0 p-1">Elimina</h6>
               </label>
             </form>
 
           </div>
         </div>
         <div class="modal-footer justify-content-center p-0 mt-2">
-          <a href="" data-bs-dismiss="modal" class="selected text-center text-reset text-decoration-none col-12 my-2">Annulla</a>
+          <a href="" data-bs-dismiss="modal" class="selected text-center text-reset text-decoration-none col-12 my-2"><h6 class="m-0 p-1">Annulla</h6></a>
         </div>
       </div>
     </div>
