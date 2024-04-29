@@ -1,4 +1,4 @@
-from django.forms import ModelForm, FileInput
+from django.forms import ModelForm, FileInput, TextInput
 from .models import *
 
 class ImageForm(ModelForm):

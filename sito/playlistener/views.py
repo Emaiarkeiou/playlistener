@@ -71,10 +71,11 @@ POST PER LE FORM E BOTTONI SUBMIT(per input)
 
 @cache_control(must_revalidate=True, no_store=True)
 def loginView(request):
+    context={}
     if request.method == 'GET':
         """ GET della pagina di login """
         if request.user.is_authenticated:
-            return redirect(userView,request.user.username)
+            return redirect(userView,request.user.get_username())
         else:
             return render(request, 'registration/login.html')
     elif request.method == 'POST':
@@ -94,13 +95,13 @@ def loginView(request):
                 error = "Credenziali errate"
         else:
             error = "Riempi tutti i campi"
-        return render(request, 'registration/login.html',context={"error":error,"username":username,"password":password})
-    else:
-        pass
-    """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""
+        context={"error":error,"username":username,"password":password}
+    return render(request, 'registration/login.html',context=context)
+
 
 @cache_control(must_revalidate=True, no_store=True)
 def signupView(request):
+    context={}
     if request.method == 'GET':
         """ GET della pagina di singup """
         return render(request, 'registration/signup.html')
@@ -111,7 +112,7 @@ def signupView(request):
         username = request.POST['username'].lower()
         password = request.POST['password']
         if nome and cognome and username and password:
-            if len(username<3):
+            if len(username)<3:
                 error = "Username troppo corto (min 3)"
             elif len(password)>=8:
                 try:
@@ -126,51 +127,55 @@ def signupView(request):
                 error = "Password troppo corta (min 8)"
         else:
             error = "Riempi tutti i campi"
-        return render(request, 'registration/signup.html',context={"error":error,"first_name":nome,"last_name":cognome,"username":username,"password":password})
-
-    else:
-        pass
-    """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""
-
+        context={"error":error,"first_name":nome,"last_name":cognome,"username":username,"password":password}
+    return render(request, 'registration/signup.html',context=context)
 
 
 @cache_control(must_revalidate=True, no_store=True)
 def editView(request):
-    if request.method == 'GET':
-        """ GET della pagina di edit """
-        return render(request, 'registration/edit.html')
-    elif request.method == 'POST':
-        """ POST della form di edit """
-        """
+    context={}
+    if request.method == 'POST':
+        if request.POST['_method'] == 'GET':
+            """ GET della pagina di edit """
+            if request.user.check_password(request.POST['password']):
+                context = {"first_name": request.user.first_name,
+                        "last_name": request.user.last_name,
+                        "username": request.user.get_username()}
+            else:
+                return redirect(userView,request.user.get_username())
         
-        DA MODIFICARE CON LE FORM DJANGO
-        
-        """
-        nome = request.POST['first_name']
-        cognome = request.POST['last_name']
-        username = request.POST['username'].lower()
-        password = request.POST['password']
-        if nome and cognome and username and password:
-            if len(username<3):
+        elif request.POST['_method'] == 'POST':
+            """ POST della form di edit """
+            error = ""
+            nome = request.POST['first_name']
+            cognome = request.POST['last_name']
+            username = request.POST['username'].lower()
+            password = request.POST['password']
+            if username and len(username)<3:
                 error = "Username troppo corto (min 3)"
-            elif len(password)>=8:
+            if password and len(password)<8:
+                error = "Password troppo corta (min 8)"
+            if not error:
                 try:
-                    User.objects.create_user(username=username, password=password, first_name=nome, last_name=cognome)
+                    user = User.objects.get(username=request.user.get_username())
+                    if username:
+                        user.username = username
+                    if nome:
+                        user.first_name = nome
+                    if cognome:
+                        user.last_name = cognome
+                    if password:
+                        user.set_password(password)
+                    user.save()
                     user = authenticate(username=username, password=password)
-                    Utente.objects.create(user=user)
-                    login(request, user)                                                            
+                    login(request, user)
                     return redirect(userView, username=username)
                 except IntegrityError:
                     error = username + " esiste già"
-            else:
-                error = "Password troppo corta (min 8)"
-        else:
-            error = "Riempi tutti i campi"
-        return render(request, 'registration/signup.html',context={"error":error,"first_name":nome,"last_name":cognome,"username":username,"password":password})
+            context={"error":error,"first_name":nome,"last_name":cognome,"username":username}
+        return render(request, 'registration/edit.html',context=context)
+    return redirect(userView,request.user.get_username())
 
-    else:
-        pass
-    """ REDIRECT AD UNA PAGINA CHE DICE CHE HAI SBAGLIATO"""
 
 
 
@@ -185,7 +190,7 @@ def logoutView(request):
 def userView(request,username):
     """View function for home page of site."""
     if request.user.is_authenticated:
-        if request.user.username == username:
+        if request.user.get_username() == username:
             user = User.objects.get(username=username)
             if request.method == 'GET':
                 lista_playlist = Playlist.objects.filter(user_id=user.id)

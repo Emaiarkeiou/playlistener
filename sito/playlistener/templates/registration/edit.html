@@ -12,7 +12,7 @@
     <p>Your username and password didn't match. Please try again.</p>
   {% endif %}
 
-  <form class="col-8 border rounded p-4" id="div_form" method="post" action="{% url 'signup' %}">
+  <form class="col-8 border rounded p-4" id="div_form" method="post" action="{% url 'edit' %}">
     {% csrf_token %}
     {% load static %}
     <div class="row text-start">
@@ -23,6 +23,7 @@
       <input type="text" name="first_name" maxlength="30" placeholder="" class="form-control" id="inputNome" value="{{ first_name }}">
       <label for="inputNome">Nome</label>
     </div>
+
     <div class="form-floating mt-3">
       <input type="text" name="last_name" maxlength="30" placeholder="" class="form-control" id="inputCognome" value="{{ last_name }}">
       <label for="inputCognome">Cognome</label>
@@ -34,7 +35,7 @@
     </div>
 
     <div class="form-floating mt-3">
-      <input type="password" name="password" maxlength="30" placeholder="" class="form-control" id="inputPassword" value="{{ password }}">
+      <input type="password" name="password" maxlength="30" placeholder="" class="form-control" id="inputPassword" value="">
       <label for="inputPassword">Password</label>
     </div>
 
@@ -43,6 +44,7 @@
     </div>
 
     <div class="mt-2">
+      <input type="hidden" name="_method" value="POST">
       <button type="submit" class="btn btn-primary py-2 btn-block w-100 h-100"><b>Salva</b></button>
     </div>
 

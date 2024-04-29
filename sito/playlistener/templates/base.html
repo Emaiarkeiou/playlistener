@@ -38,23 +38,27 @@
               </div>
             </a>
             
+            
+
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="{{ user.get_username }}">Pagina Utente</a></li>
               <li><hr class="dropdown-divider mx-2"></li>
-              <li><a class="dropdown-item" href="{% url 'edit' %}">Modifica Utente</a></li>
+              <li><a href="#modal_edit" data-bs-toggle="modal" data-bs-target="#modal_edit" class="dropdown-item">Modifica Utente</a></li>
               <li>
                 <form  method="post" action="{% url 'logout' %}">
                   {% csrf_token %}
                   <input class="dropdown-item" type="submit" value="Log out">
                 </form>
               </li>
+              
             </ul>
+
             
+
           </li>
-
         </ul>
-
       </div>
+
     </nav>
     
       
@@ -75,6 +79,32 @@
                 {% block content %}{% endblock %}
               </div>
             </div>
+        </div>
+      </div>
+
+
+
+
+      <div class="modal fade" id="modal_edit" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+          <div class="modal-content">
+            <div class="modal-header justify-content-center p-2">
+              <h1 class="modal-title text-center fs-5">Verifica Password</h1>
+            </div>
+            <div class="row modal-body d-flex justify-content-center text-center p-0 m-0">
+              <div class="d-flex col-12 p-0">
+                <form  method="post" action="{% url 'edit' %}" class="d-flex justify-content-center col-12 mt-2">
+                  {% csrf_token %}
+                  <input type="hidden" name="_method" value="GET">
+                  <input type="password" name="password" maxlength="30" placeholder="" class="form-control mx-3">
+                  <input type="submit" hidden />
+                </form>
+              </div>
+            </div>
+            <div class="modal-footer justify-content-center p-0 mt-2">
+              <a href="" data-bs-dismiss="modal" class="selected text-center text-reset text-decoration-none col-12 my-2">Annulla</a>
+            </div>
+          </div>
         </div>
       </div>
 

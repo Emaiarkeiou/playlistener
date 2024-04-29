@@ -20,7 +20,7 @@
 
 <div class="d-flex justify-content-center col-3 p-4">
   <div class="d-flex p-4">
-    <a href="#exampleModal" data-bs-toggle="modal" data-bs-target="#exampleModal" class="d-flex">
+    <a href="#modal_pfp" data-bs-toggle="modal" data-bs-target="#modal_pfp" class="d-flex">
       {% if user.utente.pfp %}
         <img src="{{ media_root }}{{ user.utente.pfp }}" class="img-fluid rounded-circle border" alt="PFP">
       {% else %}
@@ -28,12 +28,12 @@
       {% endif %}
       </a>
   </div>
-  <!-- Modal -->
-  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+  <div class="modal fade" id="modal_pfp">
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content">
         <div class="modal-header justify-content-center p-2">
-          <h1 class="modal-title text-center fs-5" id="exampleModalLabel">Immagine Profilo</h1>
+          <h1 class="modal-title text-center fs-5">Immagine Profilo</h1>
         </div>
         <div class="row modal-body d-flex justify-content-center text-center p-0 m-0">
           <div class="d-flex col-12 p-0">
