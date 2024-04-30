@@ -134,7 +134,6 @@ nav {
 
 
 
-
 .selected:hover {
   background-color: #f8f9fa;
 }
@@ -149,4 +148,24 @@ nav {
 
 .navbar {
   padding-right: inherit !important;
+}
+
+
+.playlist {
+  border-radius: 6vh;
+}
+
+.playlist-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+}
+
+.photo{
+  transition: transform .1s;
+}
+
+.photo:hover {
+  transform: scale(1.05);
 }

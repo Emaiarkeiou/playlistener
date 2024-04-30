@@ -14,7 +14,7 @@
     <!-- static CSS -->
     {% load static %}
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}" >
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}" />
   </head>
 
   <body id="gradient">
@@ -41,7 +41,7 @@
             
 
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="{{ user.get_username }}">Pagina Utente</a></li>
+              <li><a class="dropdown-item" href="{% url 'user' user.get_username %}">Pagina Utente</a></li>
               <li><hr class="dropdown-divider mx-2"></li>
               <li><a href="#modal_edit" data-bs-toggle="modal" data-bs-target="#modal_edit" class="dropdown-item">Modifica Utente</a></li>
               <li>
@@ -73,7 +73,7 @@
       </div>
 
       <div class="col-12">
-          <div class="custom_shadow bg-white container-xl p-0 d-flex justify-content-center" style="min-height:100vh;">
+          <div class="d-flex justify-content-center custom_shadow bg-white container-xl p-0" style="min-height:60vh;">
             <div class="col-sm-12 ">
               <div class="d-flex justify-content-center col-sm-12">
                 {% block content %}{% endblock %}
@@ -102,7 +102,7 @@
               </div>
             </div>
             <div class="modal-footer justify-content-center p-0 mt-2">
-              <a href="" data-bs-dismiss="modal" class="selected text-center text-reset text-decoration-none col-12 my-2"><h6 class="m-0 p-1">Elimina</h6></a>
+              <a href="" data-bs-dismiss="modal" class="selected text-center text-reset text-decoration-none col-12 my-2"><h6 class="m-0 p-1">Annulla</h6></a>
             </div>
           </div>
         </div>

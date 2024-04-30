@@ -14,4 +14,6 @@ urlpatterns = [
     path('edit/', views.editView, name='edit'),
     path('logout/', views.logoutView, name='logout'),
     path('user/<str:username>', views.userView, name='user'),
+    path('user/<str:username>/playlist/<str:id>/', views.playlistView, name='playlist'),
+    path('user/<str:username>/playlist/', views.playlistView, name='playlist'),
 ]

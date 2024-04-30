@@ -14,7 +14,7 @@
         <!-- static CSS -->
         {% load static %}
         <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}" >
-        <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+        <link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}" />
     </head>
 
     <body>

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import uuid
 
 # Create your models here.
 
@@ -58,13 +59,14 @@ class Playlist(models.Model):
     """Playlist"""
 
     tags = {
+        "fr":"",
         "sp":"sport",
         "vg":"viaggio",
-        "fr":""
     }
     #Attributi
-    nome = models.CharField(max_length=100)
-    tag = models.CharField(max_length=2,choices=tags,null=True,blank=True)
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    nome = models.CharField(max_length=100, default="Nuova Playlist")
+    tag = models.CharField(max_length=2,choices=tags,default="fr")
     cover = models.ImageField(null=True,blank=True)
     desc = models.TextField(max_length=300,null=True,blank=True)
     canzone = models.ManyToManyField(Canzone)
@@ -73,12 +75,7 @@ class Playlist(models.Model):
     # user: serve per fare un collegamento con Utente, es: con user.utente.cover riesco a prendere l'immagine
     # user_id: serve per confrontare solo l'id dello user collegato
     user = models.ForeignKey(User, on_delete=models.CASCADE)  
-    """
-    
-    AGGIUNGERE METODO CHE ELIMINA LA FOTO
-    
-    
-    """
+
     class Meta:
         ordering = ['nome']
 

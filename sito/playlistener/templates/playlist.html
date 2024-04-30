@@ -18,20 +18,20 @@
 {% block header %}
 
 
-<div class="d-flex col-6 p-4 m-0">
+<div class="d-flex  col-6 p-4 m-0 bg-danger">
 
-  <div class="m-4" style="aspect-ratio : 1 / 1">
-    <a href="#modal_pfp" data-bs-toggle="modal" data-bs-target="#modal_pfp" class="">
+  <div class="d-flex m-4 bg-success" style="aspect-ratio : 1 / 1">
+    <a href="#modal_pfp" data-bs-toggle="modal" data-bs-target="#modal_pfp" class="d-flex">
       {% if user.utente.pfp %}
-        <img src="{{ media_root }}{{ user.utente.pfp }}" class="img-fluid rounded-circle border photo" alt="PFP">
+        <img src="{{ media_root }}{{ user.utente.pfp }}" class="img-fluid rounded-circle border" alt="PFP">
       {% else %}
-        <img src="{% static 'images/pfp_empty.png' %}" class="img-fluid rounded-circle border photo" alt="PFP">
+        <img src="{% static 'images/pfp_empty.png' %}" class="img-fluid rounded-circle border" alt="PFP">
       {% endif %}
       </a>
   </div>
 
-  <div class="text-truncate m-4 ms-0">
-    <h4 class="m-0 text-capitalize">{{ user.get_full_name }}</h4>
+  <div class="text-truncate m-4 ms-0 bg-primary">
+    <h4 class="m-0 text-capitalize">{{ playlist.nome }}</h4>
     <h5 class="">@{{ user.get_username }}</h5>
   </div>
 
@@ -55,14 +55,15 @@
 
   <div class="d-flex pb-4 col-11">
     <div class="d-flex justify-content-start col-6">
-      <form class="col-11" method="post" action="{% url 'playlist' user.get_username %}">
-        {% csrf_token %}
+      <form class="col-11" method="get" action="{% url 'login' %}">
+        {% csrf_token %} 
         <button type="submit" class="btn btn-success p-0 col-12"><h6 class="my-2">Aggiungi Playlist</h6></button>
       </form>
     </div>
     <div class="d-flex justify-content-end col-6">
       <form class="col-11" method="get" action="{% url 'login' %}">
-        <button type="submit" class="btn btn-danger p-0 col-12"><h6 class="my-2">ALTROOo</h6></button>
+        {% csrf_token %} 
+        <button type="submit" class="btn btn-danger p-0 col-12"><h6 class="my-2">Elimina Playlist</h6></button>
       </form>
     </div>
   </div>
@@ -121,19 +122,14 @@
 
 
 {% block content %}
-<div class="row col-12 p-4 ">
+
 {% for playlist in playlists %}
-  <div class="col-6 col-lg-3 p-5">
-    <a href="{% url 'playlist' user.get_username playlist.id %}" class="" >
-      {% if playlist.cover %}
-        <img src="{{ media_root }}{{ user.utente.pfp }}" class="img-fluid playlist custom_shadow border photo" alt="PFP">
-      {% else %}
-        <img src="{% static 'images/cover_empty.png' %}" class="img-fluid playlist custom_shadow border photo" alt="PFP">
-      {% endif %}
-    </a>
-    <h6 class="mt-2 px-4 playlist-title">{{ playlist.nome }}</h6>
-  </div>
+    <p>{{ playlist.nome }}</p>
 {% endfor %}
-</div>
+
+{{user.utente.pfp}}
+
+{{prova}}
+
 {% endblock %}
 

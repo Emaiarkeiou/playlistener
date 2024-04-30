@@ -7,11 +7,6 @@
 
 
 {% block content %}
-
-  {% if form.errors %}
-    <p>Your username and password didn't match. Please try again.</p>
-  {% endif %}
-
   <form class="col-8 border rounded p-4" id="div_form" method="post" action="{% url 'signup' %}">
     {% csrf_token %}
     {% load static %}

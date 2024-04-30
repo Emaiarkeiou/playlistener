@@ -10,7 +10,6 @@ from .models import Album, Artista, Canzone, Playlist, Utente
 
 from django.conf import settings
 from .forms import *
-import os
 
 from PIL import Image
 
@@ -43,18 +42,6 @@ FORSE NON SERVE
 def delete_file(path):
     if os.path.isfile(path):    # Controlla se esiste
         os.remove(path)         # Elimina
-
-@receiver(post_delete, sender=Utente)
-def deletePfpUtente(sender, instance, **kwargs):
-    if instance.pfp:
-        delete_file(instance.pfp.path)
-
-"""
-
-
-"""
-
-TRASFORMARE TUTTE LE FORM CON DJANGO
 
 PROBLEMA REFRESH PAGINA ; GUARDA SALVATI
 
@@ -193,9 +180,9 @@ def userView(request,username):
         if request.user.get_username() == username:
             user = User.objects.get(username=username)
             if request.method == 'GET':
-                lista_playlist = Playlist.objects.filter(user_id=user.id)
+                playlists = Playlist.objects.filter(user_id=user.id)
                 form = ImageForm()
-                return render(request, 'user.html', context={"form":form,"playlists":lista_playlist,'media_root': settings.MEDIA_URL})
+                return render(request, 'user.html', context={"form":form,"playlists":playlists,'media_root': settings.MEDIA_URL})
             elif request.method == 'POST':
                 if request.POST['_method'] == 'PUT':
                     form = ImageForm(request.POST,request.FILES)
@@ -211,4 +198,27 @@ def userView(request,username):
                     user.utente.save()
                 return redirect(userView, username)
     return redirect(loginView)
+
+
+
+
+
+
+
+@cache_control(must_revalidate=True, no_store=True)
+def playlistView(request,username,id=None):
+    if request.user.is_authenticated:
+        if request.user.get_username() == username:
+            user = User.objects.get(username=username)
+            if request.method == 'GET':
+                playlist = Playlist.objects.get(pk=id,user=user)
+                return render(request, 'playlist.html', context={"playlist":playlist,'media_root': settings.MEDIA_URL})
+            elif request.method == 'POST':
+                if id is None:
+                    playlist = Playlist.objects.create(user=user)
+                    id = playlist.id
+                
+                return redirect(playlistView, username, id)
+    return redirect(loginView)
+
 
