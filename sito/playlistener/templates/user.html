@@ -23,9 +23,9 @@
   <div class="m-4" style="aspect-ratio : 1 / 1">
     <a href="#modal_pfp" data-bs-toggle="modal" data-bs-target="#modal_pfp" class="">
       {% if user.utente.pfp %}
-        <img src="{{ media_root }}{{ user.utente.pfp }}" class="img-fluid rounded-circle border photo" alt="PFP">
+        <img src="{{ media_root }}{{ user.utente.pfp }}" class="img-fluid rounded-circle border pfp" alt="PFP">
       {% else %}
-        <img src="{% static 'images/pfp_empty.png' %}" class="img-fluid rounded-circle border photo" alt="PFP">
+        <img src="{% static 'images/pfp_empty.png' %}" class="img-fluid rounded-circle border pfp" alt="PFP">
       {% endif %}
       </a>
   </div>
@@ -34,7 +34,6 @@
     <h4 class="m-0 text-capitalize">{{ user.get_full_name }}</h4>
     <h5 class="">@{{ user.get_username }}</h5>
   </div>
-
 </div>
 
 
@@ -42,7 +41,7 @@
 
 
 
-<div class="d-flex align-items-center flex-column col-6 p-4 border-start">
+<div class="d-flex align-items-center flex-column col-6 px-4 my-4 border-start">
 
   <div class="mb-auto pt-4 col-11">
     <div class="input-group">

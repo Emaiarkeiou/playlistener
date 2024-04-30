@@ -114,6 +114,11 @@ label {
     background:rgba(255, 255, 255, 0.9);
 }
 
+
+.divider_shadow {
+  box-shadow: 0 10px 35px 0px rgba(0,0,0,.1), 0px 2px 5px rgba(0,0,0,.1);
+}
+
 .custom_shadow {
   box-shadow: 0 0 5px rgba(0,0,0,.05), 2px 2px 5px rgba(0,0,0,.1);
 }
@@ -122,6 +127,12 @@ label {
   box-shadow: 0 0 5px rgba(0,0,0,.05), 2px 2px 5px rgba(0,0,0,.1);
   clip-path: inset(0px 0px 0px -20px);
 }
+
+
+
+
+
+
 
 nav {
   height:6.5vh ;
@@ -136,10 +147,6 @@ nav {
 
 .selected:hover {
   background-color: #f8f9fa;
-}
-
-.selected:target {
-  background-color: #000000;
 }
 
 .modal-backdrop {
@@ -162,10 +169,18 @@ nav {
   overflow: hidden;
 }
 
-.photo{
+.photo, .pfp{
   transition: transform .1s;
 }
 
 .photo:hover {
   transform: scale(1.05);
+}
+
+.pfp:hover {
+  transform: scale(1.01);
+}
+
+.profile_menu:hover {
+  background-color: #f8f9fa !important;
 }
