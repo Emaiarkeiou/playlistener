@@ -173,7 +173,7 @@ def logoutView(request):
 
 
 
-@cache_control(must_revalidate=True, no_store=True)
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def userView(request,username):
     """View function for home page of site."""
     if request.user.is_authenticated:
@@ -181,11 +181,11 @@ def userView(request,username):
             user = User.objects.get(username=username)
             if request.method == 'GET':
                 playlists = Playlist.objects.filter(user_id=user.id)
-                form = ImageForm()
+                form = PfpForm()
                 return render(request, 'user.html', context={"form":form,"playlists":playlists,'media_root': settings.MEDIA_URL})
             elif request.method == 'POST':
                 if request.POST['_method'] == 'PUT':
-                    form = ImageForm(request.POST,request.FILES)
+                    form = PfpForm(request.POST,request.FILES)
                     if form.is_valid():
                         image = request.FILES["pfp"]
                         user.utente.pfp.delete()
@@ -199,25 +199,43 @@ def userView(request,username):
                 return redirect(userView, username)
     return redirect(loginView)
 
-
-
-
-
-
-
-@cache_control(must_revalidate=True, no_store=True)
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def playlistView(request,username,id=None):
     if request.user.is_authenticated:
         if request.user.get_username() == username:
             user = User.objects.get(username=username)
             if request.method == 'GET':
                 playlist = Playlist.objects.get(pk=id,user=user)
-                return render(request, 'playlist.html', context={"playlist":playlist,'media_root': settings.MEDIA_URL})
+                form = CoverForm()
+                return render(request, 'playlist.html', context={"form":form,"playlist":playlist,'media_root': settings.MEDIA_URL})
             elif request.method == 'POST':
                 if id is None:
                     playlist = Playlist.objects.create(user=user)
                     id = playlist.id
+                elif request.POST['_method'] == 'PUT':
+                    playlist = Playlist.objects.get(pk=id,user=user)
+                    if request.POST['_name'] == 'nome':
+                        playlist.nome = request.POST['nome']
+                    elif request.POST['_name'] == 'desc':
+                        playlist.desc = request.POST['desc']
+                    elif request.POST['_name'] == 'cover':
+                        form = CoverForm(request.POST,request.FILES)
+                        if form.is_valid():
+                            image = request.FILES['cover']
+                            playlist.cover.delete()
+                            playlist.cover = image
+                            playlist.save()
+                            square_image(playlist.cover.path, 300)
+                    
+                elif request.POST['_method'] == 'DELETE':
+                    playlist = Playlist.objects.get(pk=id,user=user)
+                    if request.POST['_name'] == 'playlist':
+                        playlist.delete()
+                        return redirect(userView, username)
+                    if request.POST['_name'] == 'cover':
+                        playlist.cover.delete()
                 
+                playlist.save()
                 return redirect(playlistView, username, id)
     return redirect(loginView)
 

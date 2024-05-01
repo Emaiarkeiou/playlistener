@@ -18,21 +18,36 @@
 {% block header %}
 
 
-<div class="d-flex  col-6 p-4 m-0 bg-danger">
+<div class="d-flex col-7 p-4 m-0">
 
-  <div class="d-flex m-4 bg-success" style="aspect-ratio : 1 / 1">
+  <div class="d-flex m-4" style="aspect-ratio : 1 / 1">
     <a href="#modal_pfp" data-bs-toggle="modal" data-bs-target="#modal_pfp" class="d-flex">
-      {% if user.utente.pfp %}
-        <img src="{{ media_root }}{{ user.utente.pfp }}" class="img-fluid rounded-circle border" alt="PFP">
+      {% if playlist.cover %}
+        <img src="{{ media_root }}{{ playlist.cover }}" class="img-fluid playlist pfp border" alt="PFP">
       {% else %}
-        <img src="{% static 'images/pfp_empty.png' %}" class="img-fluid rounded-circle border" alt="PFP">
+        <img src="{% static 'images/cover_empty.png' %}" class="img-fluid playlist pfp border" alt="PFP">
       {% endif %}
       </a>
   </div>
 
-  <div class="text-truncate m-4 ms-0 bg-primary">
-    <h4 class="m-0 text-capitalize">{{ playlist.nome }}</h4>
-    <h5 class="">@{{ user.get_username }}</h5>
+  <div class="text-truncate p-4 ps-0 w-100 h-100">
+    <h4 class="m-0 p-0">
+      <form  method="post" action="{% url 'playlist' user.get_username playlist.id %}" class="">
+        {% csrf_token %}
+        <input type="hidden" name="_method" value="PUT">
+        <input type="hidden" name="_name" value="nome">
+        <input type="text" name="nome" value="{{ playlist.nome }}" maxlength="100" onchange="this.form.submit();" class="p-0 m-0 w-100 fw-bold" style="outline: 0; border:0;">
+      </form>
+   </h4>
+    <h5 class="">#{{ playlist.tag }}</h5>
+    <h5 class="">#{{ playlist.tag }}</h5>
+    <h5 class="">#{{ playlist.tag }}</h5>
+    <form  method="post" action="{% url 'playlist' user.get_username playlist.id %}" class="">
+      {% csrf_token %}
+      <input type="hidden" name="_method" value="PUT">
+      <input type="hidden" name="_name" value="desc">
+    <textarea name="desc" class="form-control" rows="3" wrap="hard" maxlength="300" onchange="this.form.submit();">{% if playlist.desc is not None %}{{ playlist.desc }}{% endif %}</textarea>
+  </form>
   </div>
 
 </div>
@@ -42,30 +57,51 @@
 
 
 
-<div class="d-flex align-items-center flex-column col-6 p-4 border-start">
-
-  <div class="mb-auto pt-4 col-11">
+<div class="d-flex col-5 p-4 my-4 align-items-center flex-column border-start">
+  
+  <div class="px-4 mb-auto col-12">
     <div class="input-group">
-      <input type="text" class="form-control" placeholder="Playlist">
+      <input type="text" class="form-control" placeholder="Canzone">
       <div class="input-group-append p-0 m-0">
-        <button class="btn btn-primary p-0 m-0" type="button"><h6 class="my-2 px-2">Cerca</h6></button>
+        <button class="btn btn-primary p-0 m-0 search_btn" type="button"><h6 class="my-2 px-2">Cerca</h6></button>
       </div>
     </div>
   </div>
 
-  <div class="d-flex pb-4 col-11">
-    <div class="d-flex justify-content-start col-6">
-      <form class="col-11" method="get" action="{% url 'login' %}">
-        {% csrf_token %} 
-        <button type="submit" class="btn btn-success p-0 col-12"><h6 class="my-2">Aggiungi Playlist</h6></button>
+  <div class="row col-12">
+
+    <div class="d-flex row px-4 m-0 col-6 align-items-end">
+
+      <p class="col-12 text-end m-0 w-100">Non hai un account?</p>
+
+      <form class="col-12 p-0" method="post" action="{% url 'playlist' user.get_username %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success p-0 col-12"><h6 class="my-2">Aggiungi Canzone</h6></button>
+      </form>
+
+    </div>
+
+    <div class="d-flex row px-4 m-0 col-6 align-items-end">
+
+      <div class="row col-12 p-0 m-0">
+        
+        <form class="col-6 m-0 p-0 pe-2" method="POST" action="{% url 'playlist' user.get_username playlist.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="_method" value="DELETE">
+          <input type="hidden" name="_name" value="playlist">
+          <button type="submit" class="btn btn-danger p-0 col-12"><h6 class="my-2">Elimina</h6></button>
+        </form>
+
+        <form class="col-6 m-0 p-0 ps-2" method="get" action="{% url 'login' %}">
+          <button type="submit" class="btn btn-secondary p-0 col-12"><h6 class="my-2">Esporta</h6></button>
+        </form>
+      </div>
+
+      <form class="col-12 p-0 mt-3" method="get" action="{% url 'login' %}">
+        <button type="submit" class="btn btn-primary p-0 col-12"><h6 class="my-2">Ordina per Grafici</h6></button>
       </form>
     </div>
-    <div class="d-flex justify-content-end col-6">
-      <form class="col-11" method="get" action="{% url 'login' %}">
-        {% csrf_token %} 
-        <button type="submit" class="btn btn-danger p-0 col-12"><h6 class="my-2">Elimina Playlist</h6></button>
-      </form>
-    </div>
+
   </div>
 
 </div>
@@ -77,7 +113,7 @@
   <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content">
       <div class="modal-header justify-content-center p-2">
-        <h1 class="modal-title text-center fs-5">Immagine Profilo</h1>
+        <h1 class="modal-title text-center fs-5">Cover Playlist</h1>
       </div>
       <div class="row modal-body d-flex justify-content-center text-center p-0 m-0">
         <div class="d-flex col-12 p-0">
@@ -85,9 +121,9 @@
           <form  method="post" action="{{ request.path }}" enctype="multipart/form-data" class="d-flex justify-content-center selected col-12 mt-2">
             {% csrf_token %}
             <input type="hidden" name="_method" value="PUT">
-
+            <input type="hidden" name="_name" value="cover">
             <label class="text-primary col-12">
-              {{ form.pfp }}
+              {{ form.cover }}
               <h6 class="m-0 p-1">Importa</h6>
             </label>
 
@@ -102,6 +138,7 @@
           <form  method="post" action="{{ request.path }}" class="d-flex p-0 justify-content-center selected col-12 ">
             {% csrf_token %}
             <input type="hidden" name="_method" value="DELETE">
+            <input type="hidden" name="_name" value="cover">
             <label class="text-danger col-12 p-0">
               <input type="submit" class="hide"/>
               <h6 class="m-0 p-1">Elimina</h6>
