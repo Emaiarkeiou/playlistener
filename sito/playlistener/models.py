@@ -65,7 +65,6 @@ class Playlist(models.Model):
         "vg":"viaggio",
     }
     #Attributi
-    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     nome = models.CharField(max_length=100, default="Nuova Playlist")
     tag = models.CharField(max_length=2,choices=tags,default="fr")
     cover = models.ImageField(null=True,blank=True)

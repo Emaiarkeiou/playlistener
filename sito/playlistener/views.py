@@ -5,11 +5,12 @@ from django.db import IntegrityError
 from django.views.decorators.cache import cache_control
 from django.dispatch import receiver
 from django.db.models.signals import post_delete,pre_delete
-from .models import Album, Artista, Canzone, Playlist, Utente
+from .models import Album, Artista, Canzone, Playlist, Utente, Ordine
 from django.conf import settings
 from .forms import *
 from PIL import Image
 
+import ast
 from .spotify import *
 
 def square_image(path, size):
@@ -217,7 +218,7 @@ def userView(request,username):
         if request.user.get_username() == username:
             user = User.objects.get(username=username)
             if request.method == 'GET':
-                playlists = Playlist.objects.filter(user_id=user.id).order_by("id")
+                playlists = Playlist.objects.filter(user_id=user.id).order_by("-id")
                 form = PfpForm()
                 return render(request, 'user.html', context={"form":form,"playlists":playlists,'media_root': settings.MEDIA_URL})
             elif request.method == 'POST':
@@ -239,13 +240,15 @@ def userView(request,username):
 
 
 
-def format_song(song):
+def format_song(song,playlist):
     """ song: model """
     """ canzone: {id, nome, image, artists_string } """
     canzone = song.__dict__
     canzone["image"] = song.album.all().values()[0]["image"]
     artists_string = [d["nome"] for d in song.artista.all().values() if "nome" in d]
     canzone["artists_string"] = ", ".join(artists_string)
+    ordine = Ordine.objects.get(canzone=song,playlist=playlist)
+    canzone["ordine"] = ordine.ordine + 1
     return canzone
 
 
@@ -275,7 +278,8 @@ def playlistView(request,username,id=None):
                     """ track: {id, nome, popularity, type,album{id,image,name},artists[{id,name }],artists_string } """
                 context["playlist"] = Playlist.objects.get(pk=id,user=user)
                 context["canzoni"] = context["playlist"].canzone.all()
-                context["canzoni"] = list(map(lambda c: format_song(c),context["canzoni"]))
+                context["canzoni"] = list(map(lambda c: format_song(c,context["playlist"]),context["canzoni"]))
+                context["canzoni"] = sorted(context["canzoni"], key=lambda d: d["ordine"])
                 context["form"] = CoverForm()
                 return render(request, 'playlist.html', context=context)
             
@@ -321,8 +325,12 @@ def playlistView(request,username,id=None):
                         #Prima elimina tutte le canzoni,album,artisti senza references
                         playlist.delete()
                         return redirect(userView, username)
-                    if request.POST['_name'] == 'cover':
+                    elif request.POST['_name'] == 'cover':
                         playlist.cover.delete()
+                    
+                    elif request.POST['_name'] == 'song':
+                        track_id = request.POST['_track']
+                        playlist.canzone.remove(Canzone.objects.get(id=track_id))
                 
                 playlist.save()
                 return redirect(playlistView, username, id)

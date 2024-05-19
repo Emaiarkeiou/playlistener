@@ -234,15 +234,15 @@
   <div class="row col-12 m-0 p-3 pt-0 bg-light rounded-3 border divider_shadow_in">
     {% for canzone in canzoni %}
       <!-- canzone: {id, nome, image, artists_string } -->
-      <div class="row col-12 m-0 p-2 mt-3 bg-white rounded divider_shadow pfp">
-
-        <img src="{{ canzone.image }}" class="col-1 rounded m-0 p-0">
-
-        <div class="col-6 m-0 ps-2">
-          <p class="col-12 m-0"><b>{{ canzone.nome }}</b></p>
-          <p class="col-12 m-0">
+      <div class="row col-12 m-0 p-2 ps-0 mt-3 bg-white rounded divider_shadow pfp overflow-hidden">
+      <div class="row col-2 m-0 p-0">
+        <p class="row col-4 justify-content-center align-items-center m-0 p-0">{{ canzone.ordine }}</p>
+          <img src="{{ canzone.image }}" class="col-7 rounded m-0 p-0">
+      </div>
+        <div class="col-5 m-0 ps-2">
+          <p class="nome-canzone col-12 m-0"><b>{{ canzone.nome }}</b></p>
+          <p class="artisti-canzone col-12 m-0">
             {{ canzone.artists_string }}
-
           </p>
         </div>
 
@@ -252,14 +252,12 @@
 
         <form method="post" action="{{ request.path }}" class="d-flex col-1 m-0  p-0 justify-content-center align-items-center">
           {% csrf_token %}
-          <input type="hidden" name="_method" value="POST">
+          <input type="hidden" name="_method" value="DELETE">
           <input type="hidden" name="_name" value="song">
-          <input type="hidden" name="_track" value="{{ canzone }}">
-          <button type="submit" class="btn btn-success m-0 p-0 text-center">
-            <h6 class="m-0 p-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
-                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-              </svg>
+          <input type="hidden" name="_track" value="{{ canzone.id }}">
+          <button type="submit" class="btn btn-danger m-0 px-2 py-1 text-center">
+            <h6 class="m-0 p-0">
+              x
             </h6>
           </button>
         </form>

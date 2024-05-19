@@ -212,3 +212,22 @@ textarea {
   border-top-left-radius : 0 !important;
   border-bottom-left-radius  : 0 !important;
 }
+
+
+
+
+.nome-canzone {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+          line-clamp: 2; 
+  -webkit-box-orient: vertical;
+}
+
+.artisti-canzone {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* number of lines to show */
+          line-clamp: 1; 
+  -webkit-box-orient: vertical;
+}
