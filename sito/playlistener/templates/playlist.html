@@ -31,7 +31,7 @@
   </div>
 
   <div class="text-truncate p-4 ps-0 w-100 h-100">
-    <h4 class="m-0 p-0">
+    <h4 class="m-0 p-0" style="height: 15%;">
       <form  method="post" action="{% url 'playlist' user.get_username playlist.id %}" class="">
         {% csrf_token %}
         <input type="hidden" name="_method" value="PUT">
@@ -39,14 +39,12 @@
         <input type="text" name="nome" value="{{ playlist.nome }}" maxlength="100" onchange="this.form.submit();" class="p-0 m-0 w-100 fw-bold" style="outline: 0; border:0;">
       </form>
    </h4>
-    <h5 class="">#{{ playlist.tag }}</h5>
-    <h5 class="">#{{ playlist.tag }}</h5>
-    <h5 class="">#{{ playlist.tag }}</h5>
-    <form  method="post" action="{% url 'playlist' user.get_username playlist.id %}" class="">
+    <h5 class="m-0 p-0" style="height: 15%;">#{{ playlist.tag }}</h5>
+    <form  class="m-0 p-0" method="post" action="{% url 'playlist' user.get_username playlist.id %}" style="height: 70%;">
       {% csrf_token %}
       <input type="hidden" name="_method" value="PUT">
       <input type="hidden" name="_name" value="desc">
-    <textarea name="desc" class="form-control" rows="3" wrap="hard" maxlength="300" onchange="this.form.submit();">{% if playlist.desc is not None %}{{ playlist.desc }}{% endif %}</textarea>
+    <textarea name="desc" class="form-control" wrap="hard" maxlength="300" onchange="this.form.submit();" style="height: 100%;">{% if playlist.desc is not None %}{{ playlist.desc }}{% endif %}</textarea>
   </form>
   </div>
 
@@ -63,7 +61,15 @@
     <div class="input-group">
       <input type="text" class="form-control" placeholder="Canzone">
       <div class="input-group-append p-0 m-0">
-        <button class="btn btn-primary p-0 m-0 search_btn" type="button"><h6 class="my-2 px-2">Cerca</h6></button>
+        <button class="btn btn-primary p-0 m-0 search_btn" type="button">
+          <h6 class="my-2 px-2">
+            <h6 class="my-2 px-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+              </svg>
+            </h6>
+          </h6>
+        </button>
       </div>
     </div>
   </div>
@@ -72,12 +78,9 @@
 
     <div class="d-flex row px-4 m-0 col-6 align-items-end">
 
-      <p class="col-12 text-end m-0 w-100">Non hai un account?</p>
+      <p class="col-12 text-end m-0 w-100">Durata superata</p>
 
-      <form class="col-12 p-0" method="post" action="{% url 'playlist' user.get_username %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-success p-0 col-12"><h6 class="my-2">Aggiungi Canzone</h6></button>
-      </form>
+        <button id="add_songs" type="button" class="btn btn-success p-0 col-12"  data-bs-toggle="modal" data-bs-target="#modal_search"><h6 class="my-2">Aggiungi Canzone</h6></button>
 
     </div>
 
@@ -107,8 +110,8 @@
 </div>
 
 
-
-
+<!-- Modals -->
+<!-- Playlist Image -->
 <div class="modal fade" id="modal_pfp">
   <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content">
@@ -135,7 +138,7 @@
         </div>
         <div class="d-flex col-12 p-0">
 
-          <form  method="post" action="{{ request.path }}" class="d-flex p-0 justify-content-center selected col-12 ">
+          <form method="post" action="{{ request.path }}" class="d-flex p-0 justify-content-center selected col-12 ">
             {% csrf_token %}
             <input type="hidden" name="_method" value="DELETE">
             <input type="hidden" name="_name" value="cover">
@@ -154,19 +157,130 @@
   </div>
 </div>
 
+<!-- search songs -->
+<div class="modal modal-xl" id="modal_search">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content" style="height: 75vh;">
+      
+      <div class="modal-body p-4">
+
+        <form method="get" action="{{ request.path }}" class="m-0 p-0" style="height: 15%;" autocomplete="off">
+          <input type="hidden" name="name" value="song">
+          <div class="col-12 input-group p-0 m-0">
+            <input type="text" class="form-control" name="search" placeholder="Canzone" value="{{ search }}">
+            <div class="input-group-append p-0 m-0">
+              <button class="btn btn-primary p-0 m-0 search_btn" type="submit">
+                <h6 class="my-2 px-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                  </svg>
+                </h6>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="col-12 m-0 p-0" style="height: 85%;">
+          <div class="col-12 m-0 p-3 pt-0 h-100 bg-light rounded-2 border divider_shadow_in overflow-auto">
+            <!-- track: {id, name, popularity, type,album{id,image,name},artists[{id,name }],artists_string } -->
+            {% for track in searched %}
+              <div class="row col-12 m-0 p-2 mt-3 bg-white rounded divider_shadow pfp">
+
+                <img src="{{ track.album.image }}" class="col-1 rounded m-0 p-0">
+
+                <div class="col-5 m-0 ps-2">
+                  <p class="col-12 m-0"><b>{{ track.name }}</b></p>
+                  <p class="col-12 m-0">
+                    {{ track.artists_string }}
+
+                  </p>
+                </div>
+
+                <div class="col-5 m-0 p-0">
+                    aesfwa
+                </div>
+
+                <form method="post" action="{{ request.path }}" class="d-flex col-1 m-0  p-0 justify-content-center align-items-center">
+                  {% csrf_token %}
+                  <input type="hidden" name="_method" value="POST">
+                  <input type="hidden" name="_name" value="song">
+                  <input type="hidden" name="_track" value="{{ track }}">
+                  <button type="submit" class="btn btn-success m-0 p-0 text-center">
+                    <h6 class="m-0 p-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                      </svg>
+                    </h6>
+                  </button>
+                </form>
+
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 
 
 {% block content %}
 
+<div class="col-8 p-4 p-sm-5 pe-0 pe-sm-0">
+  <div class="row col-12 m-0 p-3 bg-light rounded-3 border divider_shadow_in">
 {% for playlist in playlists %}
-    <p>{{ playlist.nome }}</p>
+  <div class="col-6 col-md-15 px-0 mb-2" style="aspect-ratio : 1 / 1">
+    <div class="p-3 pb-0" style="aspect-ratio : 1 / 1">
+      <a href="{% url 'playlist' user.get_username playlist.id %}" class="" >
+        {% if playlist.cover %}
+          <img src="{{ media_root }}{{ playlist.cover }}" class="img-fluid playlist divider_shadow photo" alt="PFP">
+        {% else %}
+          <img src="{% static 'images/cover_empty.png' %}" class="img-fluid playlist divider_shadow photo" alt="PFP">
+        {% endif %}
+      </a>
+      <h6 class="mt-2 px-4 playlist-title ">{{ playlist.nome }}</h6>
+    </div>
+
+  </div>
 {% endfor %}
+</div>
+</div>
 
-{{user.utente.pfp}}
 
-{{prova}}
+<div class="col-4 p-4 p-sm-5 ">
+  sawd
+  <div class="row col-12 m-0 p-3 bg-light rounded-3 border divider_shadow_in">
+{% for playlist in playlists %}
+  <div class="col-6 col-md-15 px-0 mb-2" style="aspect-ratio : 1 / 1">
+    <div class="p-3 pb-0" style="aspect-ratio : 1 / 1">
+      <a href="{% url 'playlist' user.get_username playlist.id %}" class="" >
+        {% if playlist.cover %}
+          <img src="{{ media_root }}{{ playlist.cover }}" class="img-fluid playlist divider_shadow photo" alt="PFP">
+        {% else %}
+          <img src="{% static 'images/cover_empty.png' %}" class="img-fluid playlist divider_shadow photo" alt="PFP">
+        {% endif %}
+      </a>
+      <h6 class="mt-2 px-4 playlist-title ">{{ playlist.nome }}</h6>
+    </div>
 
+  </div>
+{% endfor %}
+</div>
+</div>
 {% endblock %}
 
+
+
+{% block scripts %}
+{% if search %}
+<script>
+  window.onload = function() {
+    document.getElementById("add_songs").click();
+  };
+</script>
+{% endif %}
+{% endblock %}

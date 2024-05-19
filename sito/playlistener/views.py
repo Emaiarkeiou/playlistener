@@ -5,13 +5,12 @@ from django.db import IntegrityError
 from django.views.decorators.cache import cache_control
 from django.dispatch import receiver
 from django.db.models.signals import post_delete
-
 from .models import Album, Artista, Canzone, Playlist, Utente
-
 from django.conf import settings
 from .forms import *
-
 from PIL import Image
+
+from .spotify import *
 
 def square_image(path, size):
     img = Image.open(path)
@@ -180,7 +179,7 @@ def userView(request,username):
         if request.user.get_username() == username:
             user = User.objects.get(username=username)
             if request.method == 'GET':
-                playlists = Playlist.objects.filter(user_id=user.id)
+                playlists = Playlist.objects.filter(user_id=user.id).order_by("id")
                 form = PfpForm()
                 return render(request, 'user.html', context={"form":form,"playlists":playlists,'media_root': settings.MEDIA_URL})
             elif request.method == 'POST':
@@ -199,19 +198,58 @@ def userView(request,username):
                 return redirect(userView, username)
     return redirect(loginView)
 
+
+
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def playlistView(request,username,id=None):
     if request.user.is_authenticated:
         if request.user.get_username() == username:
             user = User.objects.get(username=username)
             if request.method == 'GET':
-                playlist = Playlist.objects.get(pk=id,user=user)
-                form = CoverForm()
-                return render(request, 'playlist.html', context={"form":form,"playlist":playlist,'media_root': settings.MEDIA_URL})
+                context = {'media_root': settings.MEDIA_URL}
+                if request.GET.get('name') == "song":
+                    if request.GET.get('search'):
+                        context["search"] = request.GET.get('search')
+                        searched = get_search(context["search"],tracks=True,albums=True,artists=True,n=10)
+                        context["searched"] = order_popularity(context["search"],searched["tracks"]+searched["albums"]+searched["artists"],10,30)
+                        request.session["search"] = context["search"]
+                        request.session["searched"] = context["searched"]
+                    else:
+                        context["search"] = request.session["search"]
+                        context["searched"] = request.session["searched"]
+                    for i in range(len(context["searched"])):
+                        if "artists" in context["searched"][i]:
+                            artists_string = [d["name"] for d in context["searched"][i]["artists"] if "name" in d]
+                            context["searched"][i]["artists_string"] = ", ".join(artists_string)
+                        #if track id in object get playlist tracks
+                    """ track: {id, nome, popularity, type,album{id,image,name},artists[{id,name }],artists_string } """
+                context["playlist"] = Playlist.objects.get(pk=id,user=user)
+                print(context["playlist"].canzone.all())
+                context["form"] = CoverForm()
+                return render(request, 'playlist.html', context=context)
+            
             elif request.method == 'POST':
                 if id is None:
                     playlist = Playlist.objects.create(user=user)
                     id = playlist.id
+
+                elif request.POST['_method'] == 'POST':
+                    playlist = Playlist.objects.get(pk=id,user=user)
+                    if request.POST['_name'] == 'song':
+                        """ track: {id, nome, popularity, type,album{id,image,name},artists[{id,name }],artists_string } """
+                        track = eval(request.POST['_track'])
+                        album,artisti = track["album"],[]
+                        album,created = Album.objects.update_or_create(id=album["id"],nome=album["name"],image=album["image"])
+                        for artist in track["artists"]:
+                            artista,created = Artista.objects.update_or_create(id=artist["id"],nome=artist["name"])
+                            artisti.append(artista)
+                        canzone,created = Canzone.objects.update_or_create(id=track["id"],nome=track["name"])
+                        print(canzone)
+                        canzone.album.add(album.id)
+                        canzone.artista.add(*[a.id for a in artisti])
+                        playlist.canzone.add(canzone.id)
+                        return redirect(request.path_info+"?name=song")
+
                 elif request.POST['_method'] == 'PUT':
                     playlist = Playlist.objects.get(pk=id,user=user)
                     if request.POST['_name'] == 'nome':
@@ -235,7 +273,7 @@ def playlistView(request,username,id=None):
                     if request.POST['_name'] == 'cover':
                         playlist.cover.delete()
                 
-                playlist.save()
+                    playlist.save()
                 return redirect(playlistView, username, id)
     return redirect(loginView)
 

@@ -17,6 +17,7 @@ class Album(models.Model):
     #Attributi
     id = models.CharField(max_length=22,primary_key=True)
     nome = models.CharField(max_length=100)
+    image = models.TextField(null=True,blank=True)
 
     class Meta:
         ordering = ['nome']
@@ -69,7 +70,7 @@ class Playlist(models.Model):
     tag = models.CharField(max_length=2,choices=tags,default="fr")
     cover = models.ImageField(null=True,blank=True)
     desc = models.TextField(max_length=300,null=True,blank=True)
-    canzone = models.ManyToManyField(Canzone)
+    canzone = models.ManyToManyField(Canzone,through='Ordine')
 
     #Playlist ha 2 attributi nel DB per indicare lo user collegato:
     # user: serve per fare un collegamento con Utente, es: con user.utente.cover riesco a prendere l'immagine
@@ -83,3 +84,10 @@ class Playlist(models.Model):
     def __str__(self):
         return self.nome
     
+class Ordine(models.Model):
+    """ Many to Many tra playlist e canzone """
+    canzone = models.ForeignKey(Canzone, on_delete=models.CASCADE)
+    Playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
+    ordine = models.IntegerField()
+    def __str__(self):
+        return self.ordine
