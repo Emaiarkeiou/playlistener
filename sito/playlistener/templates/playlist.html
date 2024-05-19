@@ -231,22 +231,42 @@
 {% block content %}
 
 <div class="col-8 p-4 p-sm-5 pe-0 pe-sm-0">
-  <div class="row col-12 m-0 p-3 bg-light rounded-3 border divider_shadow_in">
-{% for playlist in playlists %}
-  <div class="col-6 col-md-15 px-0 mb-2" style="aspect-ratio : 1 / 1">
-    <div class="p-3 pb-0" style="aspect-ratio : 1 / 1">
-      <a href="{% url 'playlist' user.get_username playlist.id %}" class="" >
-        {% if playlist.cover %}
-          <img src="{{ media_root }}{{ playlist.cover }}" class="img-fluid playlist divider_shadow photo" alt="PFP">
-        {% else %}
-          <img src="{% static 'images/cover_empty.png' %}" class="img-fluid playlist divider_shadow photo" alt="PFP">
-        {% endif %}
-      </a>
-      <h6 class="mt-2 px-4 playlist-title ">{{ playlist.nome }}</h6>
-    </div>
+  <div class="row col-12 m-0 p-3 pt-0 bg-light rounded-3 border divider_shadow_in">
+    {% for canzone in canzoni %}
+      <!-- canzone: {id, nome, image, artists_string } -->
+      <div class="row col-12 m-0 p-2 mt-3 bg-white rounded divider_shadow pfp">
 
-  </div>
-{% endfor %}
+        <img src="{{ canzone.image }}" class="col-1 rounded m-0 p-0">
+
+        <div class="col-6 m-0 ps-2">
+          <p class="col-12 m-0"><b>{{ canzone.nome }}</b></p>
+          <p class="col-12 m-0">
+            {{ canzone.artists_string }}
+
+          </p>
+        </div>
+
+        <div class="col-4 m-0 p-0">
+            aesfwa
+        </div>
+
+        <form method="post" action="{{ request.path }}" class="d-flex col-1 m-0  p-0 justify-content-center align-items-center">
+          {% csrf_token %}
+          <input type="hidden" name="_method" value="POST">
+          <input type="hidden" name="_name" value="song">
+          <input type="hidden" name="_track" value="{{ canzone }}">
+          <button type="submit" class="btn btn-success m-0 p-0 text-center">
+            <h6 class="m-0 p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+              </svg>
+            </h6>
+          </button>
+        </form>
+
+      </div>
+
+    {% endfor %}
 </div>
 </div>
 

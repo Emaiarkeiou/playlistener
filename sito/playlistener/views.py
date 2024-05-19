@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.views.decorators.cache import cache_control
 from django.dispatch import receiver
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete,pre_delete
 from .models import Album, Artista, Canzone, Playlist, Utente
 from django.conf import settings
 from .forms import *
@@ -45,6 +45,44 @@ def delete_file(path):
 PROBLEMA REFRESH PAGINA ; GUARDA SALVATI
 
 """
+
+@receiver(pre_delete, sender=Playlist)
+def delete_song(sender, instance, **kwargs):
+    #ELIMINAZIONE CANZONI NON PRESENTI IN NESSUNA PLAYLIST
+    i = 0
+    while i < instance.canzone.all().count():
+        if Playlist.objects.filter(canzone=instance.canzone.all()[i]).count() <= 1: #se non ci sono playlist con quella canzone
+            instance.canzone.all()[i].delete()                                      #elimina la canzone
+            i -= 1
+        i += 1
+        if i >= len(instance.canzone.all()):
+            break
+    instance.canzone.clear()
+
+@receiver(pre_delete, sender=Canzone)
+def delete_song_related(sender, instance, **kwargs):
+    #ELIMINAZIONE ALBUM NON AVENTI NESSUNA CANZONE SALVATA
+    i = 0
+    while i < instance.album.all().count():
+        if Canzone.objects.filter(album=instance.album.all()[i]).count() <= 1:      #se non ci sono canzoni quell'album
+            instance.album.all()[i].delete()                                        #elimina l'album
+            i -= 1
+        i += 1
+        if i >= len(instance.album.all()):
+            break
+    instance.album.clear()
+    
+    #ELIMINAZIONE ARTISTI NON AVENTI NESSUNA CANZONE SALVATA
+    i = 0
+    while i < instance.artista.all().count():
+        if Canzone.objects.filter(artista=instance.artista.all()[i]).count() <= 1:  #se non ci sono canzoni quell'artista
+            instance.artista.all()[i].delete()                                      #elimina l'album
+            i -= 1
+        i += 1
+        if i >= len(instance.artista.all()):
+            break
+    instance.artista.clear()
+
 
 """
 
@@ -200,6 +238,18 @@ def userView(request,username):
 
 
 
+
+def format_song(song):
+    """ song: model """
+    """ canzone: {id, nome, image, artists_string } """
+    canzone = song.__dict__
+    canzone["image"] = song.album.all().values()[0]["image"]
+    artists_string = [d["nome"] for d in song.artista.all().values() if "nome" in d]
+    canzone["artists_string"] = ", ".join(artists_string)
+    return canzone
+
+
+
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def playlistView(request,username,id=None):
     if request.user.is_authenticated:
@@ -224,7 +274,8 @@ def playlistView(request,username,id=None):
                         #if track id in object get playlist tracks
                     """ track: {id, nome, popularity, type,album{id,image,name},artists[{id,name }],artists_string } """
                 context["playlist"] = Playlist.objects.get(pk=id,user=user)
-                print(context["playlist"].canzone.all())
+                context["canzoni"] = context["playlist"].canzone.all()
+                context["canzoni"] = list(map(lambda c: format_song(c),context["canzoni"]))
                 context["form"] = CoverForm()
                 return render(request, 'playlist.html', context=context)
             
@@ -244,10 +295,9 @@ def playlistView(request,username,id=None):
                             artista,created = Artista.objects.update_or_create(id=artist["id"],nome=artist["name"])
                             artisti.append(artista)
                         canzone,created = Canzone.objects.update_or_create(id=track["id"],nome=track["name"])
-                        print(canzone)
                         canzone.album.add(album.id)
                         canzone.artista.add(*[a.id for a in artisti])
-                        playlist.canzone.add(canzone.id)
+                        playlist.canzone.add(canzone.id,through_defaults={'ordine': playlist.canzone.all().count()})
                         return redirect(request.path_info+"?name=song")
 
                 elif request.POST['_method'] == 'PUT':
@@ -268,12 +318,13 @@ def playlistView(request,username,id=None):
                 elif request.POST['_method'] == 'DELETE':
                     playlist = Playlist.objects.get(pk=id,user=user)
                     if request.POST['_name'] == 'playlist':
+                        #Prima elimina tutte le canzoni,album,artisti senza references
                         playlist.delete()
                         return redirect(userView, username)
                     if request.POST['_name'] == 'cover':
                         playlist.cover.delete()
                 
-                    playlist.save()
+                playlist.save()
                 return redirect(playlistView, username, id)
     return redirect(loginView)
 
