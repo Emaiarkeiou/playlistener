@@ -5,12 +5,12 @@ from django.db import IntegrityError
 from django.views.decorators.cache import cache_control
 from django.dispatch import receiver
 from django.db.models.signals import post_delete,pre_delete
+from django.db.models import F
 from .models import Album, Artista, Canzone, Playlist, Utente, Ordine
 from django.conf import settings
 from .forms import *
 from PIL import Image
 
-import ast
 from .spotify import *
 
 def square_image(path, size):
@@ -248,10 +248,11 @@ def format_song(song,playlist):
     artists_string = [d["nome"] for d in song.artista.all().values() if "nome" in d]
     canzone["artists_string"] = ", ".join(artists_string)
     ordine = Ordine.objects.get(canzone=song,playlist=playlist)
-    canzone["ordine"] = ordine.ordine + 1
+    canzone["ordine"] = ordine.n + 1
     return canzone
 
-
+def scala_ordini(n,playlist):
+    Ordine.objects.filter(playlist=playlist,n__gt=n).update(n=F('n') - 1)
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def playlistView(request,username,id=None):
@@ -260,7 +261,7 @@ def playlistView(request,username,id=None):
             user = User.objects.get(username=username)
             if request.method == 'GET':
                 context = {'media_root': settings.MEDIA_URL}
-                if request.GET.get('name') == "song":
+                if request.GET.get('_name') == "song":
                     if request.GET.get('search'):
                         context["search"] = request.GET.get('search')
                         searched = get_search(context["search"],tracks=True,albums=True,artists=True,n=12)
@@ -293,15 +294,16 @@ def playlistView(request,username,id=None):
                     if request.POST['_name'] == 'song':
                         """ track: {id, nome, popularity, type,album{id,image,name},artists[{id,name }],artists_string } """
                         track = eval(request.POST['_track'])
-                        album,artisti = track["album"],[]
-                        album,created = Album.objects.update_or_create(id=album["id"],nome=album["name"],image=album["image"])
-                        for artist in track["artists"]:
-                            artista,created = Artista.objects.update_or_create(id=artist["id"],nome=artist["name"])
-                            artisti.append(artista)
-                        canzone,created = Canzone.objects.update_or_create(id=track["id"],nome=track["name"])
-                        canzone.album.add(album.id)
-                        canzone.artista.add(*[a.id for a in artisti])
-                        playlist.canzone.add(canzone.id,through_defaults={'ordine': playlist.canzone.all().count()})
+                        if track["album"]["image"] and track["artists"]:
+                            album,artisti = track["album"],[]
+                            album,created = Album.objects.update_or_create(id=album["id"],nome=album["name"],image=album["image"])
+                            for artist in track["artists"]:
+                                artista,created = Artista.objects.update_or_create(id=artist["id"],nome=artist["name"])
+                                artisti.append(artista)
+                            canzone,created = Canzone.objects.update_or_create(id=track["id"],nome=track["name"])
+                            canzone.album.add(album.id)
+                            canzone.artista.add(*[a.id for a in artisti])
+                            playlist.canzone.add(canzone.id,through_defaults={'n': playlist.canzone.all().count()})
                         return redirect(request.path_info+"?name=song")
 
                 elif request.POST['_method'] == 'PUT':
@@ -318,6 +320,13 @@ def playlistView(request,username,id=None):
                             playlist.cover = image
                             playlist.save()
                             square_image(playlist.cover.path, 300)
+                    elif request.POST['_name'] == 'playlist':
+                        ids = list(map(lambda canzone: canzone["id"],playlist.canzone.all().values()))
+                        track_features = get_from_ids("audio-features",ids)
+                        feature = request.POST['_param']
+                        punti = [int(request.POST['_p'+str(i)]) for i in range(1,6)]
+                        ordered = order_playlist(track_features,feature,punti)
+                        print(ordered)
                     
                 elif request.POST['_method'] == 'DELETE':
                     playlist = Playlist.objects.get(pk=id,user=user)
@@ -331,10 +340,12 @@ def playlistView(request,username,id=None):
                     elif request.POST['_name'] == 'song':
                         track_id = request.POST['_track']
                         canzone = Canzone.objects.get(id=track_id)
+                        n = int(request.POST['_ordine']) - 1
+                        scala_ordini(n,playlist)
                         playlist.canzone.remove(canzone)
                         if Playlist.objects.filter(canzone=canzone).count() <= 0: #se non ci sono playlist con quella canzone
                             canzone.delete()
-                
+                        
                 playlist.save()
                 return redirect(playlistView, username, id)
     return redirect(loginView)

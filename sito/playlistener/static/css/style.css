@@ -7,7 +7,7 @@ label {
 }
 
 
-#gradient {
+#gradient, span {
     background: 
     radial-gradient(
       60% 40% at 0% 0%,
@@ -231,3 +231,4 @@ textarea {
           line-clamp: 1; 
   -webkit-box-orient: vertical;
 }
+

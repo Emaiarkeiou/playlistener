@@ -87,6 +87,6 @@ class Ordine(models.Model):
     """ Many to Many tra playlist e canzone """
     canzone = models.ForeignKey(Canzone, on_delete=models.CASCADE)
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
-    ordine = models.IntegerField()
+    n = models.IntegerField()   # 0 a n-1
     def __str__(self):
-        return str(self.playlist) + " - "+ str(self.ordine) +" - "+ str(self.canzone)
+        return str(self.playlist) + " - "+ str(self.n) +" - "+ str(self.canzone)

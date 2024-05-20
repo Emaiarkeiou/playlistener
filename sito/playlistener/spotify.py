@@ -145,6 +145,11 @@ def get_from_ids(param,ids):
         headers = get_auth_header()
         result = get(url,headers=headers)
         response += json.loads(result.content)[param.replace("-","_")]
+    
+    if param == "audio-features":
+        response = calculate_eff_energy_closerability(response)
+        keys = ["id","acousticness","danceability","valence","loudness",   "eff_energy","closerability"]
+        response = list(map(lambda d: dict((k, d[k]) for k in keys if k in d),response))
     return response
 
 
@@ -156,10 +161,12 @@ def add_names_to_audiofeatures(audiofeatures,ids,names):
     response = list(map(lambda e: e | {"name":diz[e["id"]]},audiofeatures))
     return response
 
-def order_tracks(tracks_features,feature):
-    lista = list(reversed(sorted(tracks_features, key=lambda d: d[feature])))
-    for e in lista:
-        print(f"{e['name']:30.30} | Eff {e['eff_energy']:5.3f} | close {e['closerability']:5.3f}  | Acoustic {e['acousticness']:10} | Dance{e['danceability']:10} | Energy{e['energy']:10} | Tempo{e['tempo']:10} | Volume: {pow(22,((60+e['loudness'])/60)+1)/150:5.3f} | Felicità{e['valence']:10}")
+def order_playlist(tracks,feature,punti):
+    lista = list(reversed(sorted(tracks, key=lambda d: d[feature])))
+    return lista
+    #print(f"Eff {e['eff_energy']:5.3f} | close {e['closerability']:5.3f}  | Acoustic {e['acousticness']:10} | Dance{e['danceability']:10} | Energy{e['energy']:10} | Tempo{e['tempo']:10} | Volume: {pow(22,((60+e['loudness'])/60)+1)/150:5.3f} | Felicità{e['valence']:10}")
+    
+
 
 """
 Calcolo l'Energia contando 60% energy, 20% loudness, 15% valence(-0.15 a 0.15), 5% danceability, -5% acousticness
@@ -170,32 +177,16 @@ es: loudness: all'inizio tracks basse verso la fine tracks alte
 // max = 5
 """
 
-x = []
-y = []
-
-def order_tracks_eff_energy(tracks_features):
+def calculate_eff_energy_closerability(tracks_features):
     features = [dict(track,
                      eff_energy = (.5*track["energy"] + 0.3*(pow(22,((60+track['loudness'])/60)+1)/150) + .4*(track["valence"]) + .25*track["danceability"]*track["valence"]*10
                             + 0.005*track["tempo"]*((60+track["loudness"])/60) - .5*track["acousticness"])*(5/4.7),
                      closerability = - .5*track["acousticness"] + .3*track["danceability"] - .3*track["energy"] + 0.8
                 ) for track in tracks_features]
-    listay = list(reversed(sorted(features, key=lambda d: d["eff_energy"])))
-    i = 0
-    for e in listay:
-        print(f"{e['name']:30.30} | Eff {e['eff_energy']:5.3f} | close {e['closerability']:5.3f}  | Acoustic {e['acousticness']:10} | Dance{e['danceability']:10} | Energy{e['energy']:10} | Tempo{e['tempo']:10} | Volume: {pow(22,((60+e['loudness'])/60)+1)/150:5.3f} | Felicità{e['valence']:10}")
-        y.append(e['eff_energy'])
-        x.append(i)
-        i +=1 
-
-    listax = list(reversed(sorted(features, key=lambda d: d["closerability"])))
-    print("\n\n Ordine per x")
-    for e in listax:
-        print(f"{e['name']:30.30} | Eff {e['eff_energy']:5.3f} | close {e['closerability']:5.3f}  | Acoustic {e['acousticness']:10} | Dance{e['danceability']:10} | Energy{e['energy']:10} | Tempo{e['tempo']:10} | Volume: {pow(22,((60+e['loudness'])/60)+1)/150:5.3f} | Felicità{e['valence']:10}")
-
+    return features
 
 token = get_token()
 
-#"Midnights till dawn edition","red taylor's version","1989","lover","reputation","guts","sour","thank u, next","sweetener","future nostalgia","happier than ever","folklore"
 
 """
 names = ["guts spilled"]
@@ -217,23 +208,26 @@ names = list(map(lambda track: track["name"],tracks))
 
 tracks_features = add_names_to_audiofeatures(get_from_ids("audio-features",ids),ids,names)
 """
+
+
 """
+<option>Acustica</option>
 print("\nacousticness")
 order_tracks(tracks_features,"acousticness")
 
+<option>Ballabilità</option>
 print("\ndanceability")
 order_tracks(tracks_features,"danceability")
 
-print("\nenergy")
-order_tracks(tracks_features,"energy")
+<option>Felicità</option>
+print("\nivalence")
+order_tracks(tracks_features,"valence")
 
-print("\ninstrumentalness")
-order_tracks(tracks_features,"instrumentalness")
-
+<option>Volume</option>
 print("\nloudness")
 order_tracks(tracks_features,"loudness")
 """
 
-
+#<option selected>Energia</option>
 #order_tracks_eff_energy(tracks_features)
 
