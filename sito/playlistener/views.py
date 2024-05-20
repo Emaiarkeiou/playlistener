@@ -249,6 +249,7 @@ def format_song(song,playlist):
     canzone["artists_string"] = ", ".join(artists_string)
     ordine = Ordine.objects.get(canzone=song,playlist=playlist)
     canzone["ordine"] = ordine.n + 1
+    canzone["style"] = "12"
     return canzone
 
 def scala_ordini(n,playlist):
@@ -324,7 +325,7 @@ def playlistView(request,username,id=None):
                         ids = list(map(lambda canzone: canzone["id"],playlist.canzone.all().values()))
                         track_features = get_from_ids("audio-features",ids)
                         feature = request.POST['_param']
-                        punti = [int(request.POST['_p'+str(i)]) for i in range(1,6)]
+                        punti = [int(request.POST['_p'+str(i)])-1 for i in range(1,6)] #0 - len-1
                         ordered = order_playlist(track_features,feature,punti)
                         print(ordered)
                     

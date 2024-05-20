@@ -162,7 +162,28 @@ def add_names_to_audiofeatures(audiofeatures,ids,names):
     return response
 
 def order_playlist(tracks,feature,punti):
-    lista = list(reversed(sorted(tracks, key=lambda d: d[feature])))
+    punti = list(map(lambda x: x-min(punti),punti))
+    rangey = max(punti)
+    print(punti)
+    perc = [0 for i in range(rangey)]       #perc Y
+    print(perc)
+    for i in range(len(punti)-1):
+        diff = punti[i+1] - punti[i]        #diff Y
+        if diff == 0:
+            k = 0 if punti[i] == 0 else punti[i]-1
+            perc[k] += 1
+        elif diff > 0:                  #se crescente
+            for j in range(diff):
+                perc[punti[i]+j] += 1/diff
+        elif diff < 0:                  #se decrescente
+            for j in range(1,-diff+1):
+                perc[punti[i]-j] += 1/(-diff)
+    print(perc)
+    lista = list(sorted(tracks, key=lambda d: d[feature]))
+    # dividere in sezioni
+    # ordinare ogni sezione per closerability
+    # dividere in sottosezioni
+    # ordinare ogni sottosezione crescente o decrescente, guardare anche i picchi
     return lista
     #print(f"Eff {e['eff_energy']:5.3f} | close {e['closerability']:5.3f}  | Acoustic {e['acousticness']:10} | Dance{e['danceability']:10} | Energy{e['energy']:10} | Tempo{e['tempo']:10} | Volume: {pow(22,((60+e['loudness'])/60)+1)/150:5.3f} | Felicità{e['valence']:10}")
     
