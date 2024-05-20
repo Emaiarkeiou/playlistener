@@ -330,7 +330,10 @@ def playlistView(request,username,id=None):
                     
                     elif request.POST['_name'] == 'song':
                         track_id = request.POST['_track']
-                        playlist.canzone.remove(Canzone.objects.get(id=track_id))
+                        canzone = Canzone.objects.get(id=track_id)
+                        playlist.canzone.remove(canzone)
+                        if Playlist.objects.filter(canzone=canzone).count() <= 0: #se non ci sono playlist con quella canzone
+                            canzone.delete()
                 
                 playlist.save()
                 return redirect(playlistView, username, id)
