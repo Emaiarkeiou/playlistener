@@ -164,7 +164,7 @@
       <div class="modal-body p-4">
 
         <form method="get" action="{{ request.path }}" class="m-0 p-0" style="height: 15%;" autocomplete="off">
-          <input type="hidden" name="_name" value="song">
+          <input type="hidden" name="name" value="song">
           <div class="col-12 input-group p-0 m-0">
             <input type="text" class="form-control" name="search" placeholder="Canzone, Album o Artista" value="{{ search }}">
             <div class="input-group-append p-0 m-0">
@@ -270,8 +270,8 @@
       <!-- canzone: {id, nome, image, artists_string } -->
       <div class="row col-12 m-0 p-2 px-0 mt-3 bg-white rounded divider_shadow pfp overflow-hidden">
         <div class="row col-2 m-0 p-0">
-          <p class="row col-4 justify-content-center align-items-center m-0 p-0">{{ canzone.ordine }}</p>
-            <img src="{{ canzone.image }}" class="col-7 rounded m-0 p-0">
+          <p class="row col-7 justify-content-center align-items-center m-0 p-0">{{ canzone.ordine }}</p>
+          <img src="{{ canzone.image }}" class="col-5 rounded m-0 p-0">
         </div>
         <div class="col-5 m-0 ps-2">
           <p class="nome-canzone col-12 m-0"><b>{{ canzone.nome }}</b></p>
@@ -299,8 +299,6 @@
               </button>
             </form>
         </div>
-
-        
 
       </div>
 
