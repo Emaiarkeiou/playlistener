@@ -240,17 +240,29 @@ def userView(request,username):
 
 
 
-def format_song(song,playlist):
+def format_playlist(playlist,songs,values,feature):
     """ song: model """
     """ canzone: {id, nome, image, artists_string } """
-    canzone = song.__dict__
-    canzone["image"] = song.album.all().values()[0]["image"]
-    artists_string = [d["nome"] for d in song.artista.all().values() if "nome" in d]
-    canzone["artists_string"] = ", ".join(artists_string)
-    ordine = Ordine.objects.get(canzone=song,playlist=playlist)
-    canzone["ordine"] = ordine.n + 1
-    canzone["style"] = "12"
-    return canzone
+    maxs = max([v[feature] for v in values])
+    formatted = []
+    for song,value in zip(songs,values):
+        canzone = song.__dict__
+        canzone["image"] = song.album.all().values()[0]["image"]
+        artists_string = [d["nome"] for d in song.artista.all().values() if "nome" in d]
+        canzone["artists_string"] = ", ".join(artists_string)
+        ordine = Ordine.objects.get(canzone=song,playlist=playlist)
+        canzone["ordine"] = ordine.n + 1
+        canzone["param"] = (value[feature]/maxs)*100
+        formatted.append(canzone)
+    return formatted
+
+def ordina(playlist,ordini,feature):
+    for i in range(len(ordini)):
+        canzone = Canzone.objects.get(id=ordini[i]["id"])
+        ordine = Ordine.objects.get(canzone=canzone,playlist=playlist)
+        ordine.n = i
+        ordine.save()
+
 
 def scala_ordini(n,playlist):
     Ordine.objects.filter(playlist=playlist,n__gt=n).update(n=F('n') - 1)
@@ -276,12 +288,17 @@ def playlistView(request,username,id=None):
                         if "artists" in context["searched"][i]:
                             artists_string = [d["name"] for d in context["searched"][i]["artists"] if "name" in d]
                             context["searched"][i]["artists_string"] = ", ".join(artists_string)
-                        #if track id in object get playlist tracks
-                    """ track: {id, nome, popularity, type,album{id,image,name},artists[{id,name }],artists_string } """
+
                 context["playlist"] = Playlist.objects.get(pk=id,user=user)
                 context["canzoni"] = context["playlist"].canzone.all()
-                context["canzoni"] = list(map(lambda c: format_song(c,context["playlist"]),context["canzoni"]))
+                ids = list(map(lambda canzone: canzone["id"],context["canzoni"].values()))
+                track_features = get_from_ids("audio-features",ids)
+                context["canzoni"] = format_playlist(context["playlist"],context["canzoni"],track_features,"eff_energy")
                 context["canzoni"] = sorted(context["canzoni"], key=lambda d: d["ordine"])
+
+                context["features"] = [c["param"] for c in context["canzoni"]]
+                context["labels"] = ["" for i in range(len(context["features"]))]
+
                 context["form"] = CoverForm()
                 return render(request, 'playlist.html', context=context)
             
@@ -327,7 +344,7 @@ def playlistView(request,username,id=None):
                         feature = request.POST['_param']
                         punti = [int(request.POST['_p'+str(i)])-1 for i in range(1,6)] #0 - len-1
                         ordered = order_playlist(track_features,feature,punti)
-                        print(ordered)
+                        ordina(playlist,ordered,feature)
                     
                 elif request.POST['_method'] == 'DELETE':
                     playlist = Playlist.objects.get(pk=id,user=user)

@@ -282,7 +282,7 @@
 
         <div class="row col-5 m-0 p-0">
             <div class="col-10 m-0 p-1 rounded border">
-              <span class="d-block h-100 rounded" style="width: {{ canzone.style }}%;"></span>
+              <span class="d-block h-100 rounded" style="width: {{canzone.param}}%;"></span>
             </div>
             <form method="post" action="{{ request.path }}" class="d-flex col-2 m-0 p-0 justify-content-center align-items-center">
               {% csrf_token %}
@@ -308,30 +308,61 @@
 
 
 <div class="col-4 p-4 p-sm-5 ">
-  sawd
-  <div class="row col-12 m-0 p-3 bg-light rounded-3 border divider_shadow_in">
-{% for playlist in playlists %}
-  <div class="col-6 col-md-15 px-0 mb-2" style="aspect-ratio : 1 / 1">
-    <div class="p-3 pb-0" style="aspect-ratio : 1 / 1">
-      <a href="{% url 'playlist' user.get_username playlist.id %}" class="" >
-        {% if playlist.cover %}
-          <img src="{{ media_root }}{{ playlist.cover }}" class="img-fluid playlist divider_shadow photo" alt="PFP">
-        {% else %}
-          <img src="{% static 'images/cover_empty.png' %}" class="img-fluid playlist divider_shadow photo" alt="PFP">
-        {% endif %}
-      </a>
-      <h6 class="mt-2 px-4 playlist-title ">{{ playlist.nome }}</h6>
-    </div>
-
+  <div class="row position-fixed m-0 p-0 bg-light rounded-3 border divider_shadow_in">
+    <canvas class="m-0" id="graph"></canvas>
   </div>
-{% endfor %}
-</div>
 </div>
 {% endblock %}
 
 
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script type="text/javascript">
+  const ctx = document.getElementById("graph");
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [{% for l in labels %} '{{ l }}', {% endfor %}],
+      datasets: [{
+        data: [{% for l in features %} '{{ l }}', {% endfor %}],
+        borderColor: "rgba(0, 168, 107, 1)",
+        borderWidth: 5,
+      }]
+    },
+    options: {
+      elements: {
+        point:{
+          radius: 0
+        }
+      },
+      tension:1,
+      scales: {
+        x: {
+          grid: {
+            display: false
+          }
+        },
+      },
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      layout: {
+        padding: {
+            left: -25,
+            right: 0,
+            top: 30,
+            bottom: 0
+        }
+    }
+    }
+  });
+</script>
+
 {% if search %}
 <script>
   window.onload = function() {

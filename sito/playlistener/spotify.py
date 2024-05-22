@@ -4,7 +4,7 @@ from requests import post,get
 import json
 from difflib import SequenceMatcher
 import math
-from itertools import islice 
+from itertools import islice,chain
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
@@ -164,65 +164,78 @@ def add_names_to_audiofeatures(audiofeatures,ids,names):
     return response
 
 def order_playlist(tracks,feature,punti):
-    punti = list(map(lambda x: x-min(punti),punti))
-    # tratto = {y:,lun:,dir:}
-    """
-    y: n sezione verticale (0-rangey)
-    lun: lunghezza tratto in terimini di numero di canzoni
-    dir: andamento (cresc/decres) (-1/0/+1)
-    """
-    tratti = [] 
-    for i in range(len(punti)-1):
-        diff = punti[i+1] - punti[i]        #diff Y
-        if diff == 0:
-            k = 0 if punti[i] == 0 else punti[i]-1
-            tratti.append({"y":k,"lun":len(tracks)/(len(punti)-1),"dir":0})
-        elif diff > 0:                  #se crescente
-            for j in range(diff):
-                tratti.append({"y":punti[i]+j,"lun":(len(tracks)/diff)/(len(punti)-1),"dir":diff})
-        elif diff < 0:                  #se decrescente
-            for j in range(1,-diff+1):
-                tratti.append({"y":punti[i]-j,"lun":(len(tracks)/(-diff))/(len(punti)-1),"dir":diff})
-        print(tratti)
-        print(len(tratti))
-    lista = list(sorted(tracks, key=lambda d: d[feature]))  #lista canzoni ordinate per feature
-    perc = [i for i in range(max(punti))] # [[ {y:0,lun:,dir:},{y:0,lun:,dir:} ] , [{y:1,lun:,dir:},{y:1,lun:,dir:}],...]
-    for i in perc:
-        perc[i] = sum([d["lun"] for d in tratti if d["y"] == i])
-    
-    lunghezze = divide(len(tracks),perc)
-    lista = iter(lista) #tracks
-    divisi = [list(islice(lista, elem)) for elem in lunghezze] # dividere in sezioni
-    divisi = list(map(lambda x: sorted(x, key=lambda d: d['closerability']),divisi)) # ordinare ogni sezione per closerability
-    for i in range(max(punti)): #per ogni sezione_y
-        perc = []
-        trattiy = []
-        print(len(tratti))
-        for j in range(len(tratti)):
-            print(tratti[j])
-            if isinstance(tratti[j], dict):
+    if len(set(punti)) <= 1:  #se i punti sono tutti uguali
+        return list(sorted(tracks, key=lambda t: t['closerability']))
+    else:
+        punti = list(map(lambda x: x-min(punti),punti))
+        tratti = [] 
+        # tratto = {y:,lun:,dir:}
+        """
+        y: n sezione verticale (0-rangey)
+        lun: lunghezza tratto in terimini di numero di canzoni
+        dir: andamento (cresc/decres) (-1/0/+1)
+        """
+        for i in range(len(punti)-1):   #creazione tratti
+            diff = punti[i+1] - punti[i]        #diff Y
+            if diff == 0:
+                k = 0 if punti[i] == 0 else punti[i]-1
+                tratti.append({"y":k,"lun":len(tracks)/(len(punti)-1),"dir":0})
+            elif diff > 0:                  #se crescente
+                for j in range(diff):
+                    tratti.append({"y":punti[i]+j,"lun":(len(tracks)/diff)/(len(punti)-1),"dir":diff})
+            elif diff < 0:                  #se decrescente
+                for j in range(1,-diff+1):
+                    tratti.append({"y":punti[i]-j,"lun":(len(tracks)/(-diff))/(len(punti)-1),"dir":diff})
+
+        for i in range(len(tratti)):    #eliminazione dei tratti ne crescenti ne decrescenti
+            if tratti[i]["dir"] == 0:
+                indexes = []
+                j = i
+                while j>0 and tratti[j]["dir"] == 0:
+                    j-=1
+                if tratti[j]["dir"] != 0:
+                    indexes.append(j)
+                j = i
+                while j<len(tratti)-1 and tratti[j]["dir"] == 0:
+                    j+=1
+                if tratti[j]["dir"] != 0:
+                    indexes.append(j)
+                for j in indexes:
+                    tratti[j]["lun"] += tratti[i]["lun"]/len(indexes)
+        tratti = [t for t in tratti if t["dir"] != 0]
+
+        lista = list(sorted(tracks, key=lambda d: d[feature]))  #lista canzoni ordinate per feature
+        perc = [i for i in range(max(punti))] # [[ {y:0,lun:,dir:},{y:0,lun:,dir:} ] , [{y:1,lun:,dir:},{y:1,lun:,dir:}],...]
+        for i in perc:
+            perc[i] = sum([d["lun"] for d in tratti if d["y"] == i])
+        
+        lunghezze = divide(len(tracks),perc)
+        lista = iter(lista) #tracks
+        divisi = [list(islice(lista, elem)) for elem in lunghezze] # dividere in sezioni
+        divisi = list(map(lambda x: sorted(x, key=lambda d: d['closerability']),divisi)) # ordinare ogni sezione per closerability
+
+        tracks = [i for i in range(len(tratti))]
+        for i in range(max(punti)): #per ogni sezione_y
+            perc = []
+            trattiy = []
+            for j in range(len(tratti)):
                 if tratti[j]["y"] == i:
                     trattiy.append(j)
-           #indici dei tracci
-        perc = [tratti[j]["lun"] for j in trattiy] #percentuali di ogni tratto
-        lunghezze = divide(len(divisi[i]),perc)
-        lista = iter(divisi[i]) #tracks di una sezioni
-        divisi_y = [list(islice(lista, elem)) for elem in lunghezze] # dividere in tratti 
-        for j,y in zip(trattiy,divisi_y):  #per ogni indice del tratto
+            #indici dei tracci
+            perc = [tratti[j]["lun"] for j in trattiy] #percentuali di ogni tratto
+            lunghezze = divide(len(divisi[i]),perc)
+            lista = iter(divisi[i]) #tracks di una sezioni
+            divisi_y = [list(islice(lista, elem)) for elem in lunghezze] # dividere in tratti 
+            for j,y in zip(trattiy,divisi_y):  #per ogni indice del tratto
+                if tratti[j]["dir"] > 0:
+                    tracks[j] = list(sorted(y, key=lambda d: d[feature]))
+                elif tratti[j]["dir"] < 0:
+                    tracks[j] = list(reversed(list(sorted(y, key=lambda d: d[feature]))))
 
-            if tratti[j]["dir"] == 0:       # ordinare ogni tratto crescente o decrescente, guardare anche i picchi
-                pass #controllare se concavo o convesso
-            elif tratti[j]["dir"] > 0:
-                tratti[j] = list(sorted(y, key=lambda d: d[feature]))
-            elif tratti[j]["dir"] < 0:
-                tratti[j] = list(reversed(list(sorted(y, key=lambda d: d[feature]))))
-                
-    for t in tratti:
-        for g in t:
-            print(g)
-    return []
-    #print(f"Eff {e['eff_energy']:5.3f} | close {e['closerability']:5.3f}  | Acoustic {e['acousticness']:10} | Dance{e['danceability']:10} | Energy{e['energy']:10} | Tempo{e['tempo']:10} | Volume: {pow(22,((60+e['loudness'])/60)+1)/150:5.3f} | Felicità{e['valence']:10}")
+        return list(chain.from_iterable(tracks))  
     
+
+
 def divide(n,perc):
     floored = list(map(math.floor,perc))
     if n-sum(floored):
