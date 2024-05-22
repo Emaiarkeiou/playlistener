@@ -292,12 +292,13 @@ def playlistView(request,username,id=None):
                 context["playlist"] = Playlist.objects.get(pk=id,user=user)
                 context["canzoni"] = context["playlist"].canzone.all()
                 ids = list(map(lambda canzone: canzone["id"],context["canzoni"].values()))
-                track_features = get_from_ids("audio-features",ids)
-                context["canzoni"] = format_playlist(context["playlist"],context["canzoni"],track_features,"eff_energy")
-                context["canzoni"] = sorted(context["canzoni"], key=lambda d: d["ordine"])
+                if ids:
+                    track_features = get_from_ids("audio-features",ids)
+                    context["canzoni"] = format_playlist(context["playlist"],context["canzoni"],track_features,"eff_energy")
+                    context["canzoni"] = sorted(context["canzoni"], key=lambda d: d["ordine"])
 
-                context["features"] = [c["param"] for c in context["canzoni"]]
-                context["labels"] = ["" for i in range(len(context["features"]))]
+                    context["features"] = [c["param"] for c in context["canzoni"]]
+                    context["labels"] = ["" for i in range(len(context["features"]))]
 
                 context["form"] = CoverForm()
                 return render(request, 'playlist.html', context=context)
