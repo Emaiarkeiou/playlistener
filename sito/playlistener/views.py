@@ -218,9 +218,14 @@ def userView(request,username):
         if request.user.get_username() == username:
             user = User.objects.get(username=username)
             if request.method == 'GET':
-                playlists = Playlist.objects.filter(user_id=user.id).order_by("-id")
+                search = request.GET.get('name') if request.GET.get('name') else ""
+                if search:
+                    playlists = Playlist.objects.filter(user_id=user.id,nome__contains = search).order_by("-id")
+                else:
+                    playlists = Playlist.objects.filter(user_id=user.id).order_by("-id")
                 form = PfpForm()
-                return render(request, 'user.html', context={"form":form,"playlists":playlists,'media_root': settings.MEDIA_URL})
+                return render(request, 'user.html', context={"form":form,"playlists":playlists,'search':search,
+                                                             'media_root': settings.MEDIA_URL})
             elif request.method == 'POST':
                 if request.POST['_method'] == 'PUT':
                     form = PfpForm(request.POST,request.FILES)
@@ -252,7 +257,10 @@ def format_playlist(playlist,songs,values,feature):
         canzone["artists_string"] = ", ".join(artists_string)
         ordine = Ordine.objects.get(canzone=song,playlist=playlist)
         canzone["ordine"] = ordine.n + 1
-        canzone["param"] = (value[feature]/maxs)*100
+        if feature == "loudness":
+            canzone["param"] = value[feature]+100+maxs
+        else:
+            canzone["param"] = (value[feature]/maxs)*100
         formatted.append(canzone)
     return formatted
 
@@ -268,7 +276,7 @@ def scala_ordini(n,playlist):
     Ordine.objects.filter(playlist=playlist,n__gt=n).update(n=F('n') - 1)
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
-def playlistView(request,username,id=None):
+def playlistView(request,username,id=None,param="eff_energy"):
     if request.user.is_authenticated:
         if request.user.get_username() == username:
             user = User.objects.get(username=username)
@@ -278,7 +286,7 @@ def playlistView(request,username,id=None):
                     if request.GET.get('search'):
                         context["search"] = request.GET.get('search')
                         searched = get_search(context["search"],tracks=True,albums=True,artists=True,n=10)
-                        context["searched"] = order_popularity(context["search"],searched["tracks"]+searched["albums"]+searched["artists"],30,50)
+                        context["searched"] = order_popularity(context["search"],searched["tracks"]+searched["albums"]+searched["artists"],10,50)
                         request.session["search"] = context["search"]
                         request.session["searched"] = context["searched"]
                     else:
@@ -294,12 +302,13 @@ def playlistView(request,username,id=None):
                 ids = list(map(lambda canzone: canzone["id"],context["canzoni"].values()))
                 if ids:
                     track_features = get_from_ids("audio-features",ids)
-                    context["canzoni"] = format_playlist(context["playlist"],context["canzoni"],track_features,"eff_energy")
+                    context["canzoni"] = format_playlist(context["playlist"],context["canzoni"],track_features,param)
                     context["canzoni"] = sorted(context["canzoni"], key=lambda d: d["ordine"])
 
                     context["features"] = [c["param"] for c in context["canzoni"]]
                     context["labels"] = ["" for i in range(len(context["features"]))]
-
+                context["param"] = {}
+                context["param"][param] = True
                 context["form"] = CoverForm()
                 return render(request, 'playlist.html', context=context)
             
@@ -346,6 +355,7 @@ def playlistView(request,username,id=None):
                         punti = [int(request.POST['_p'+str(i)])-1 for i in range(1,6)] #0 - len-1
                         ordered = order_playlist(track_features,feature,punti)
                         ordina(playlist,ordered,feature)
+                        return redirect(playlistView, username, id, feature)
                     
                 elif request.POST['_method'] == 'DELETE':
                     playlist = Playlist.objects.get(pk=id,user=user)
@@ -366,7 +376,7 @@ def playlistView(request,username,id=None):
                             canzone.delete()
                         
                 playlist.save()
-                return redirect(playlistView, username, id)
+                return redirect(playlistView, username, id, param)
     return redirect(loginView)
 
 

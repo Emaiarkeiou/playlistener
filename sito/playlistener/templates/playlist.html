@@ -58,20 +58,7 @@
 <div class="d-flex col-5 p-4 my-4 align-items-center flex-column border-start">
   
   <div class="px-4 mb-auto col-12">
-    <div class="input-group">
-      <input type="text" class="form-control" placeholder="Canzone, Album o Artista">
-      <div class="input-group-append p-0 m-0">
-        <button class="btn btn-primary p-0 m-0 search_btn" type="button">
-          <h6 class="my-2 px-2">
-            <h6 class="my-2 px-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-              </svg>
-            </h6>
-          </h6>
-        </button>
-      </div>
-    </div>
+    
   </div>
 
   <div class="row col-12">
@@ -231,16 +218,16 @@
     <div class="modal-content" style="height: 75vh;">
       
       <div class="modal-body p-4">
-        <form method="post" action="{{ request.path }}" class="m-0 p-0" style="height: 15%;">
+        <form method="post" action="{% url 'playlist' user.get_username playlist.id %}" class="m-0 p-0" style="height: 15%;">
           {% csrf_token %}
           <input type="hidden" name="_method" value="PUT">
           <input type="hidden" name="_name" value="playlist">
           <select class="form-select" name="_param">
-            <option value="eff_energy" selected>Energia</option>
-            <option value="danceability">Ballabilità</option>
-            <option value="valence">Felicità</option>
-            <option value="acousticness">Acustica</option>
-            <option value="loudness">Volume</option>
+            <option value="eff_energy" {% if param.eff_energy %} selected {% endif %}>Energia</option>
+            <option value="danceability" {% if param.danceability %} selected {% endif %}>Ballabilità</option>
+            <option value="valence" {% if param.valence %} selected {% endif %}>Felicità</option>
+            <option value="acousticness" {% if param.acousticness %} selected {% endif %}>Acustica</option>
+            <option value="loudness" {% if param.loudness %} selected {% endif %}>Volume</option>
           </select>
           <input type="number" name="_p1" max="5" value=1>
           <input type="number" name="_p2" max="5" value=2>
@@ -307,10 +294,21 @@
 </div>
 
 
-<div class="col-4 p-4 p-sm-5 ">
-  <div class="row position-fixed m-0 p-0 bg-light rounded-3 border divider_shadow_in" style=" height:40vh;">
-    <canvas class="m-0" id="graph"></canvas>
-  </div>
+<div class="col-4 p-4 p-sm-5">
+
+  <div class="col-4 row position-fixed m-0 p-0 bg-light rounded-3 border divider_shadow_in bg-danger" style="width: 18vw; height:35vh;">
+    <div class="m-0 p-3 pb-0">
+      <select class="form-select" value="{{ param }}" onchange="document.location.href = `{% url 'playlist' user.get_username playlist.id %}/` + this.value">
+        <option value="eff_energy" {% if param.eff_energy %} selected {% endif %}>Energia</option>
+        <option value="danceability" {% if param.danceability %} selected {% endif %}>Ballabilità</option>
+        <option value="valence" {% if param.valence %} selected {% endif %}>Felicità</option>
+        <option value="acousticness" {% if param.acousticness %} selected {% endif %}>Acustica</option>
+        <option value="loudness" {% if param.loudness %} selected {% endif %}>Volume</option>
+      </select>
+    </div>
+    <div class="m-0 pt-3 pe-4">
+      <canvas class="m-0 p-0" id="graph"></canvas>
+    </div>
 </div>
 {% endblock %}
 
@@ -356,10 +354,11 @@ maintainAspectRatio: false,
       layout: {
         padding: {
             left: 0,
-            right: 25,
-            top: 30,
+            right: 0,
+            top: 0,
             bottom: 0
-        }
+        },
+
     }
     }
   });

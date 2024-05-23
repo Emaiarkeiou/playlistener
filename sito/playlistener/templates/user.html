@@ -40,18 +40,20 @@
 
 <div class="d-flex col-5 p-4 my-4 align-items-center flex-column border-start">
   <div class="px-4 mb-auto col-12">
-    <div class="input-group">
-      <input type="text" class="form-control" placeholder="Playlist">
-      <div class="input-group-append p-0 m-0">
-        <button class="btn btn-primary p-0 m-0 search_btn" type="button">
-          <h6 class="my-2 px-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-            </svg>
-          </h6>
-        </button>
+    <form class="m-0 p-0" method="get" action="{{ request.path }}">
+      <div class="input-group">
+        <input type="text" name="name" class="form-control" placeholder="Playlist" value="{{ search }}" onchange="this.form.submit()">
+        <div class="input-group-append p-0 m-0">
+          <button type="submit" class="btn btn-primary p-0 m-0 search_btn">
+            <h6 class="my-2 px-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+              </svg>
+            </h6>
+          </button>
+        </div>
       </div>
-    </div>
+    </form>
   </div>
   <div class="row col-12">
     <div class="d-flex row px-4 m-0 col-6 align-items-end">
@@ -60,9 +62,25 @@
         <button type="submit" class="btn btn-success p-0 col-12"><h6 class="my-2">Aggiungi Playlist</h6></button>
       </form>
     </div>
+
     <div class="d-flex row px-4 m-0 col-6 align-items-end">
-      <div class="row col-12 p-0 m-0"> </div>
+
+      <p class="col-12 text-start ps-1 mb-1">Filtro</p>
+
+      <div class="p-0 col-12">
+        <div class="row col-12 p-0 m-0">
+          <select class="form-select" value="{{ param }}" onchange="document.location.href = `{% url 'user' user.get_username %}/` + this.value">
+            <option disabled selected value> --seleziona un filtro--</option>
+            <option value="libero" {% if param.eff_energy %} selected {% endif %}>Libero</option>
+            <option value="sport" {% if param.danceability %} selected {% endif %}>Sport</option>
+            <option value="viaggio" {% if param.valence %} selected {% endif %}>Viaggio</option>
+          </select>
+        </div>
+      </div>
+
     </div>
+
+    
   </div>
 </div>
 
@@ -117,24 +135,25 @@
 
 
 {% block content %}
-<div class="col-12 p-4 p-sm-5 ">
+<div class="col-12 p-4 p-sm-5 m-0">
   <div class="row col-12 m-0 p-3 bg-light rounded-3 border divider_shadow_in">
-{% for playlist in playlists %}
-  <div class="col-6 col-md-15 px-0 mb-2" style="aspect-ratio : 1 / 1">
-    <div class="p-3 pb-0" style="aspect-ratio : 1 / 1">
-      <a href="{% url 'playlist' user.get_username playlist.id %}" class="" >
-        {% if playlist.cover %}
-          <img src="{{ media_root }}{{ playlist.cover }}" class="img-fluid playlist divider_shadow photo" alt="PFP">
-        {% else %}
-          <img src="{% static 'images/cover_empty.png' %}" class="img-fluid playlist divider_shadow photo" alt="PFP">
-        {% endif %}
-      </a>
-      <h6 class="mt-2 px-4 playlist-title ">{{ playlist.nome }}</h6>
-    </div>
+    {% for playlist in playlists %}
+      <div class="col-6 col-md-15 px-0 mb-2" style="aspect-ratio : 1 / 1">
+        <div class="p-3 pb-0" style="aspect-ratio : 1 / 1">
+          <a href="{% url 'playlist' user.get_username playlist.id %}/eff_energy" class="" >
+            {% if playlist.cover %}
+              <img src="{{ media_root }}{{ playlist.cover }}" class="img-fluid playlist divider_shadow photo" alt="PFP">
+            {% else %}
+              <img src="{% static 'images/cover_empty.png' %}" class="img-fluid playlist divider_shadow photo" alt="PFP">
+            {% endif %}
+          </a>
+          <h6 class="mt-2 px-4 playlist-title ">{{ playlist.nome }}</h6>
+        </div>
 
+      </div>
+    {% endfor %}
   </div>
-{% endfor %}
 </div>
-</div>
+
 {% endblock %}
 

@@ -60,7 +60,7 @@ class Playlist(models.Model):
     """Playlist"""
 
     tags = {
-        "fr":"",
+        "fr":"libero",
         "sp":"sport",
         "vg":"viaggio",
     }
