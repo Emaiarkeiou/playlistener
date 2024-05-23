@@ -56,36 +56,36 @@ def get_search(string,tracks=False,albums=False,artists=False,n=1):
                                          | {"album":{"id":d["album"]["id"],"name":d["album"]["name"],"image":d["album"]["images"][0]["url"]}}
                                          | {"artists":[{"id":a["id"],"name":a["name"]} for a in d["artists"]]},
                                          json_result["tracks"]["items"]))
-            
         if albums:
             resolve["albums"] = [d["id"] for d in json_result["albums"]["items"] if "id" in d]
             resolve["albums"] = get_from_ids("albums",resolve["albums"]) #per prendere le popolarità
-            resolve["albums"] = list(map(lambda d: dict((k, d[k]) for k in keys if k in d) | {"image":d["images"][0]["url"]},resolve["albums"]))
+            albumss = []
+            for a in resolve["albums"]:
+                a = {k: a[k] for k in a.keys() - {'tracks'}}
+                print(a)
+                albumss.append(dict((k, a[k]) for k in keys if k in a) | {"image":a["images"][0]["url"]})
+            resolve["albums"] = albumss
+            
         if artists:
-            resolve["artists"] = list(map(lambda d: dict((k, d[k]) for k in keys if k in d),json_result["artists"]["items"]))
+            resolve["artists"] =list(map(lambda d: dict((k, d[k]) for k in keys if k in d),json_result["artists"]["items"]))
     return resolve
 
 def order_popularity(name,lista,sus,n):
     """ Sceglie le n opzioni più vicine al nome e le ordina per popolarità """
     lista = list(reversed(sorted(lista, key=lambda d: similar(name,d["name"]))))[:n]
-
     lista = list(reversed(sorted(lista, key=lambda d: d["popularity"])))[:n]
+    tracks = []
     sus = sus
-    i=0
-    while i < sus*5:
-        if lista[i]["type"] == "artist":
-            lista[i:i+sus-1] = get_artist_top_tracks(lista[i],sus)
-            i += sus-1
-        elif lista[i]["type"] == "album":
-            lista[i:i+sus-1] = get_album_first_tracks(lista[i],sus)
-            i += sus-1
-        i += 1
-        if i >= len(lista):
-            break
+    for t in lista:
+        if t["type"] == "artist":
+            tracks += get_artist_top_tracks(t,sus)
+        elif t["type"] == "album":
+            tracks += get_album_first_tracks(t)
     """ track: {id, nome, popularity, type,album{id,image,name},artists[{id,name }] } """
-    lista = remove_duplicates_id(lista)
-    n = n if n<len(lista) else len(lista)
-    return lista[:n]
+    tracks = remove_duplicates_id(tracks)
+    n = n if n<len(tracks) else len(tracks)
+    tracks = [t for t in tracks if ("album" in t.keys() and "artists" in t.keys())]
+    return tracks[:n]
 
 def remove_duplicates_id(lista):
     ids = []
@@ -111,9 +111,9 @@ def get_artist_top_tracks(artist,n):
                     | {"artists":[{"id":a["id"],"name":a["name"]} for a in d["artists"]]},
                     json_result["tracks"][:n]))
 
-def get_album_first_tracks(album,n):
+def get_album_first_tracks(album):
     """ Get informazioni base delle prime canzoni di 1 album """
-    url = "https://api.spotify.com/v1/albums/" + album["id"] + "/tracks?limit=" + str(n)
+    url = "https://api.spotify.com/v1/albums/" + album["id"] + "/tracks"
     headers = get_auth_header()
     result = get(url,headers=headers)
     json_result = json.loads(result.content)

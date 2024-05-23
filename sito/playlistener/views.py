@@ -277,8 +277,8 @@ def playlistView(request,username,id=None):
                 if request.GET.get('name') == "song":
                     if request.GET.get('search'):
                         context["search"] = request.GET.get('search')
-                        searched = get_search(context["search"],tracks=True,albums=True,artists=True,n=15)
-                        context["searched"] = order_popularity(context["search"],searched["tracks"]+searched["albums"]+searched["artists"],10,50)
+                        searched = get_search(context["search"],tracks=True,albums=True,artists=True,n=10)
+                        context["searched"] = order_popularity(context["search"],searched["tracks"]+searched["albums"]+searched["artists"],30,50)
                         request.session["search"] = context["search"]
                         request.session["searched"] = context["searched"]
                     else:

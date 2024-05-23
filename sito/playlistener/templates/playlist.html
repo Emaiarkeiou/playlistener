@@ -188,15 +188,15 @@
                 <img src="{{ track.album.image }}" class="col-1 rounded m-0 p-0">
 
                 <div class="col-5 m-0 ps-2">
-                  <p class="col-12 m-0"><b>{{ track.name }}</b></p>
-                  <p class="col-12 m-0">
+                  <p class="col-12 m-0 nome-canzone"><b>{{ track.name }}</b></p>
+                  <p class="col-12 m-0 artisti-canzone">
                     {{ track.artists_string }}
 
                   </p>
                 </div>
 
                 <div class="col-5 m-0 p-0">
-                    aesfwa
+                    
                 </div>
 
                 <form method="post" action="{{ request.path }}" class="d-flex col-1 m-0  p-0 justify-content-center align-items-center">
@@ -308,7 +308,7 @@
 
 
 <div class="col-4 p-4 p-sm-5 ">
-  <div class="row position-fixed m-0 p-0 bg-light rounded-3 border divider_shadow_in">
+  <div class="row position-fixed m-0 p-0 bg-light rounded-3 border divider_shadow_in" style=" height:40vh;">
     <canvas class="m-0" id="graph"></canvas>
   </div>
 </div>
@@ -333,12 +333,14 @@
       }]
     },
     options: {
+      responsive: true,
+maintainAspectRatio: false,
       elements: {
         point:{
           radius: 0
         }
       },
-      tension:1,
+      tension:0.5,
       scales: {
         x: {
           grid: {
@@ -353,8 +355,8 @@
       },
       layout: {
         padding: {
-            left: -25,
-            right: 0,
+            left: 0,
+            right: 25,
             top: 30,
             bottom: 0
         }
