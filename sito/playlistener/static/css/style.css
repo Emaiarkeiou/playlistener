@@ -232,3 +232,7 @@ textarea {
   -webkit-box-orient: vertical;
 }
 
+
+.bg-gray {
+  background: rgba(210,212,210,1);
+}

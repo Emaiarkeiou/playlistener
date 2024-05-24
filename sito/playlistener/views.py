@@ -254,8 +254,6 @@ def userView(request,username,param="all"):
 
 
 def format_playlist(playlist,songs,values,feature):
-    """ song: model """
-    """ canzone: {id, nome, image, artists_string } """
     maxs = max([v[feature] for v in values])
     formatted = []
     for song,value in zip(songs,values):
@@ -272,6 +270,24 @@ def format_playlist(playlist,songs,values,feature):
         else:
             canzone["feature_perc"] = (value[feature]/maxs)*100
         formatted.append(canzone)
+    return formatted
+
+def format_search(songs,values,feature):
+    maxs = max([v[feature] for v in values])
+    formatted = []
+    for song,value in zip(songs,values):
+        canzone = song ####################################################prendere solo cosa serve
+        canzone["image"] = song["album"]["image"]
+        artists_string = [d["name"] for d in song["artists"] if "name" in d]
+        canzone["artists_string"] = ", ".join(artists_string)
+        canzone["duration"] = value["duration_ms"] / 1000
+        canzone["feature"] = value[feature]
+        if feature == "loudness":
+            canzone["feature_perc"] = value[feature]+100+maxs
+        else:
+            canzone["feature_perc"] = (value[feature]/maxs)*100
+        formatted.append(canzone)
+        print(canzone)
     return formatted
 
 def ordina(playlist,ordini,feature):
@@ -295,17 +311,20 @@ def playlistView(request,username,id=None,param="eff_energy"):
                 if request.GET.get('name') == "song":
                     if request.GET.get('search'):
                         context["search"] = request.GET.get('search')
-                        searched = get_search(context["search"],tracks=True,albums=True,artists=True,n=10)
-                        context["searched"] = order_popularity(context["search"],searched["tracks"]+searched["albums"]+searched["artists"],10,50)
+                        if context["search"].startswith(("\"", "\'")) and context["search"].endswith(("\"", "\'")): #Se la stringa è compresa tra virgolette
+                            searched = get_search(context["search"][1:-1],tracks=True,n=20)                         #Cerca SOLO canzoni con QUEL titolo
+                            context["searched"] = order_popularity(context["search"][1:-1],True,searched["tracks"],10,50)
+                        else:
+                            searched = get_search(context["search"],tracks=True,albums=True,artists=True,n=10)
+                            context["searched"] = order_popularity(context["search"],False,searched["tracks"]+searched["albums"]+searched["artists"],10,50)
+                        ids = [c["id"] for c in context["searched"]]
+                        track_features = get_from_ids("audio-features",ids)
+                        context["searched"] = format_search(context["searched"],track_features,"eff_energy")
                         request.session["search"] = context["search"]
                         request.session["searched"] = context["searched"]
                     else:
                         context["search"] = request.session["search"]
                         context["searched"] = request.session["searched"]
-                    for i in range(len(context["searched"])):
-                        if "artists" in context["searched"][i]:
-                            artists_string = [d["name"] for d in context["searched"][i]["artists"] if "name" in d]
-                            context["searched"][i]["artists_string"] = ", ".join(artists_string)
 
                 context["playlist"] = Playlist.objects.get(pk=id,user=user)
                 duration,context["hours"],context["minutes"],context["seconds"] = 0,0,0,0
@@ -326,8 +345,6 @@ def playlistView(request,username,id=None,param="eff_energy"):
                     m, s = divmod(context["playlist"].durata_min, 60)
                     h, m = divmod(m, 60)
                     context["hours_min"], context["minutes_min"] = int(h), int(m)
-                    print(duration)
-                    print(context["playlist"].durata_min)
                     if duration >= context["playlist"].durata_min:
                         context["superata"] = True
                 context["param"] = {param:True}

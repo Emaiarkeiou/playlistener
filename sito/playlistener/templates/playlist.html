@@ -198,7 +198,7 @@
       
       <div class="modal-body p-4">
 
-        <form method="get" action="{{ request.path }}" class="m-0 p-0" style="height: 15%;" autocomplete="off">
+        <form method="get" action="{{ request.path }}" class="m-0 p-0" style="height: 10%;" autocomplete="off">
           <input type="hidden" name="name" value="song">
           <div class="col-12 input-group p-0 m-0">
             <input type="text" class="form-control" name="search" placeholder="Canzone, Album o Artista" value="{{ search }}">
@@ -214,11 +214,12 @@
           </div>
         </form>
 
-        <div class="col-12 m-0 p-0" style="height: 85%;">
+        <div class="col-12 m-0 p-0" style="height: 90%;">
           <div class="col-12 m-0 p-3 pt-0 h-100 bg-light rounded-2 border divider_shadow_in overflow-auto">
-            <!-- track: {id, name, popularity, type,album{id,image,name},artists[{id,name }],artists_string } -->
+            <!-- track: {id, name, popularity, type,duration,feature,feature_perc,artists_string } -->
             {% for track in searched %}
-              <div class="row col-12 m-0 p-2 mt-3 bg-white rounded divider_shadow pfp">
+
+              <div class="row col-12 m-0 p-2 mt-3 {% if track.feature >= playlist.energia_min %}bg-white{% else %}bg-gray{% endif %} rounded divider_shadow pfp">
 
                 <img src="{{ track.album.image }}" class="col-1 rounded m-0 p-0">
 
@@ -226,7 +227,6 @@
                   <p class="col-12 m-0 nome-canzone"><b>{{ track.name }}</b></p>
                   <p class="col-12 m-0 artisti-canzone">
                     {{ track.artists_string }}
-
                   </p>
                 </div>
 

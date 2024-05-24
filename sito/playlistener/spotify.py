@@ -66,25 +66,29 @@ def get_search(string,tracks=False,albums=False,artists=False,n=1):
             resolve["albums"] = albumss
             
         if artists:
-            resolve["artists"] =list(map(lambda d: dict((k, d[k]) for k in keys if k in d),json_result["artists"]["items"]))
+            resolve["artists"] = list(map(lambda d: dict((k, d[k]) for k in keys if k in d),json_result["artists"]["items"]))
     return resolve
 
-def order_popularity(name,lista,sus,n):
+def order_popularity(name,exact,lista,n_artist,tot):
     """ Sceglie le n opzioni più vicine al nome e le ordina per popolarità """
-    lista = list(reversed(sorted(lista, key=lambda d: similar(name,d["name"]))))[:n]
-    lista = list(reversed(sorted(lista, key=lambda d: d["popularity"])))[:n]
+    if exact:
+        lista = [t for t in lista if name.lower() in t["name"].lower()][:tot]
+    else:
+        lista = list(reversed(sorted(lista, key=lambda d: similar(name,d["name"]))))[:tot]
+    lista = list(reversed(sorted(lista, key=lambda d: d["popularity"])))[:tot]
     tracks = []
-    sus = sus
     for t in lista:
         if t["type"] == "artist":
-            tracks += get_artist_top_tracks(t,sus)
+            tracks += get_artist_top_tracks(t,n_artist)
         elif t["type"] == "album":
             tracks += get_album_first_tracks(t)
+        else:
+            tracks.append(t)
     """ track: {id, nome, popularity, type, duration_ms, album{id,image,name},artists[{id,name }] } """
     tracks = remove_duplicates_id(tracks)
-    n = n if n<len(tracks) else len(tracks)
+    tot = tot if tot<len(tracks) else len(tracks)
     tracks = [t for t in tracks if ("album" in t.keys() and "artists" in t.keys())]
-    return tracks[:n]
+    return tracks[:tot]
 
 def remove_duplicates_id(lista):
     ids = []
@@ -262,48 +266,3 @@ def calculate_eff_energy_closerability(tracks_features):
     return features
 
 token = get_token()
-
-
-"""
-names = ["guts spilled"]
-size = 10
-
-searched = get_search(names[0],tracks=True,albums=True,artists=True,n=size)
-print(order_popularity(names[0],searched["tracks"]+searched["albums"]+searched["artists"],15))
-"""
-
-
-"""
-for name in names:
-    tracks += get_search(name,albums=True)["albums"][0]["tracks"]["items"]
-
-print("Got")
-
-ids = list(map(lambda track: track["id"],tracks))
-names = list(map(lambda track: track["name"],tracks))
-
-tracks_features = add_names_to_audiofeatures(get_from_ids("audio-features",ids),ids,names)
-"""
-
-
-"""
-<option>Acustica</option>
-print("\nacousticness")
-order_tracks(tracks_features,"acousticness")
-
-<option>Ballabilità</option>
-print("\ndanceability")
-order_tracks(tracks_features,"danceability")
-
-<option>Felicità</option>
-print("\nivalence")
-order_tracks(tracks_features,"valence")
-
-<option>Volume</option>
-print("\nloudness")
-order_tracks(tracks_features,"loudness")
-"""
-
-#<option selected>Energia</option>
-#order_tracks_eff_energy(tracks_features)
-
