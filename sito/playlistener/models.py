@@ -60,20 +60,21 @@ class Playlist(models.Model):
     """Playlist"""
 
     tags = {
-        "fr":"libero",
-        "sp":"sport",
-        "vg":"viaggio",
+        "libero":"libero",
+        "sport":"sport",
+        "viaggio":"viaggio",
     }
     #Attributi
     nome = models.CharField(max_length=100, default="Nuova Playlist")
-    tag = models.CharField(max_length=2,choices=tags,default="fr")
+
+    tag = models.CharField(max_length=14,choices=tags,default="libero")
+    energia_min = models.FloatField(null=True,blank=True)
+    durata_min = models.FloatField(null=True,blank=True)
+
     cover = models.ImageField(null=True,blank=True)
     desc = models.TextField(max_length=300,null=True,blank=True)
     canzone = models.ManyToManyField(Canzone,through='Ordine')
 
-    #Playlist ha 2 attributi nel DB per indicare lo user collegato:
-    # user: serve per fare un collegamento con Utente, es: con user.utente.cover riesco a prendere l'immagine
-    # user_id: serve per confrontare solo l'id dello user collegato
     user = models.ForeignKey(User, on_delete=models.CASCADE)  
 
     class Meta:

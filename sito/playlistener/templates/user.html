@@ -65,16 +65,16 @@
 
     <div class="d-flex row px-4 m-0 col-6 align-items-end">
 
-      <p class="col-12 text-start ps-1 mb-1">Filtro</p>
+      <label class="col-12 text-start ps-1 mb-1">Filtro</label>
 
       <div class="p-0 col-12">
         <div class="row col-12 p-0 m-0">
           <select class="form-select" value="{{ param }}" onchange="document.location.href = `{% url 'user' user.get_username %}/` + this.value">
             <option disabled value> --seleziona un filtro--</option>
-            <option selected></option>
-            <option value="libero" {% if param.eff_energy %} selected {% endif %}>Libero</option>
-            <option value="sport" {% if param.danceability %} selected {% endif %}>Sport</option>
-            <option value="viaggio" {% if param.valence %} selected {% endif %}>Viaggio</option>
+            <option value="all" {% if param.all %} selected {% endif %}></option>
+            <option value="libero" {% if param.libero %} selected {% endif %}>Libero</option>
+            <option value="sport" {% if param.sport %} selected {% endif %}>Sport</option>
+            <option value="viaggio" {% if param.viaggio %} selected {% endif %}>Viaggio</option>
           </select>
         </div>
       </div>

@@ -52,7 +52,7 @@ def get_search(string,tracks=False,albums=False,artists=False,n=1):
         json_result = json.loads(result.content)
         keys = ["id","name","popularity","type"]
         if tracks:
-            resolve["tracks"] = list(map(lambda d: dict((k, d[k]) for k in keys if k in d) 
+            resolve["tracks"] = list(map(lambda d: dict((k, d[k]) for k in keys+["duration_ms"] if k in d) 
                                          | {"album":{"id":d["album"]["id"],"name":d["album"]["name"],"image":d["album"]["images"][0]["url"]}}
                                          | {"artists":[{"id":a["id"],"name":a["name"]} for a in d["artists"]]},
                                          json_result["tracks"]["items"]))
@@ -62,7 +62,6 @@ def get_search(string,tracks=False,albums=False,artists=False,n=1):
             albumss = []
             for a in resolve["albums"]:
                 a = {k: a[k] for k in a.keys() - {'tracks'}}
-                print(a)
                 albumss.append(dict((k, a[k]) for k in keys if k in a) | {"image":a["images"][0]["url"]})
             resolve["albums"] = albumss
             
@@ -81,7 +80,7 @@ def order_popularity(name,lista,sus,n):
             tracks += get_artist_top_tracks(t,sus)
         elif t["type"] == "album":
             tracks += get_album_first_tracks(t)
-    """ track: {id, nome, popularity, type,album{id,image,name},artists[{id,name }] } """
+    """ track: {id, nome, popularity, type, duration_ms, album{id,image,name},artists[{id,name }] } """
     tracks = remove_duplicates_id(tracks)
     n = n if n<len(tracks) else len(tracks)
     tracks = [t for t in tracks if ("album" in t.keys() and "artists" in t.keys())]
@@ -105,7 +104,7 @@ def get_artist_top_tracks(artist,n):
     headers = get_auth_header()
     result = get(url,headers=headers)
     json_result = json.loads(result.content)
-    keys = ["id","name"]
+    keys = ["id","name","duration_ms"]
     return list(map(lambda d: dict((k, d[k]) for k in keys if k in d) 
                     | {"album":{"id":d["album"]["id"],"name":d["album"]["name"],"image":d["album"]["images"][0]["url"]}}
                     | {"artists":[{"id":a["id"],"name":a["name"]} for a in d["artists"]]},
@@ -117,7 +116,7 @@ def get_album_first_tracks(album):
     headers = get_auth_header()
     result = get(url,headers=headers)
     json_result = json.loads(result.content)
-    keys = ["id","name"]
+    keys = ["id","name","duration_ms"]
     return list(map(lambda d: dict((k, d[k]) for k in keys if k in d)
                     | {"album":{"id":album["id"],"name":album["name"],"image":album["image"]}}
                     | {"artists":[{"id":a["id"],"name":a["name"]} for a in d["artists"]]},
@@ -150,7 +149,7 @@ def get_from_ids(param,ids):
     
     if param == "audio-features":
         response = calculate_eff_energy_closerability(response)
-        keys = ["id","acousticness","danceability","valence","loudness",   "eff_energy","closerability"]
+        keys = ["id","acousticness","danceability","valence","loudness","duration_ms",   "eff_energy","closerability"]
         response = list(map(lambda d: dict((k, d[k]) for k in keys if k in d),response))
     return response
 

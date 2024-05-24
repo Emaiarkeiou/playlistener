@@ -213,7 +213,7 @@ def logoutView(request):
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
-def userView(request,username):
+def userView(request,username,param="all"):
     """View function for home page of site."""
     if request.user.is_authenticated:
         if request.user.get_username() == username:
@@ -221,12 +221,19 @@ def userView(request,username):
             if request.method == 'GET':
                 search = request.GET.get('name') if request.GET.get('name') else ""
                 if search:
-                    playlists = Playlist.objects.filter(user_id=user.id,nome__contains = search).order_by("-id")
+                    if param == "all":
+                        playlists = Playlist.objects.filter(user_id=user.id, nome__contains = search).order_by("-id")
+                    else:
+                        playlists = Playlist.objects.filter(user_id=user.id, nome__contains = search, tag=param).order_by("-id")
                 else:
-                    playlists = Playlist.objects.filter(user_id=user.id).order_by("-id")
+                    if param == "all":
+                        playlists = Playlist.objects.filter(user_id=user.id).order_by("-id") 
+                    else:
+                        playlists = Playlist.objects.filter(user_id=user.id, tag=param).order_by("-id")
                 form = PfpForm()
+                
                 return render(request, 'user.html', context={"form":form,"playlists":playlists,'search':search,
-                                                             'media_root': settings.MEDIA_URL})
+                                                             'media_root': settings.MEDIA_URL,'param':{param:True}})
             elif request.method == 'POST':
                 if request.POST['_method'] == 'PUT':
                     form = PfpForm(request.POST,request.FILES)
@@ -240,7 +247,7 @@ def userView(request,username):
                 elif request.POST['_method'] == 'DELETE':
                     user.utente.pfp.delete()
                     user.utente.save()
-                return redirect(userView, username)
+                return redirect(userView, username,param)
     return redirect(loginView)
 
 
@@ -256,12 +263,14 @@ def format_playlist(playlist,songs,values,feature):
         canzone["image"] = song.album.all().values()[0]["image"]
         artists_string = [d["nome"] for d in song.artista.all().values() if "nome" in d]
         canzone["artists_string"] = ", ".join(artists_string)
+        canzone["duration"] = value["duration_ms"] / 1000
         ordine = Ordine.objects.get(canzone=song,playlist=playlist)
         canzone["ordine"] = ordine.n + 1
+        canzone["feature"] = value[feature]
         if feature == "loudness":
-            canzone["param"] = value[feature]+100+maxs
+            canzone["feature_perc"] = value[feature]+100+maxs
         else:
-            canzone["param"] = (value[feature]/maxs)*100
+            canzone["feature_perc"] = (value[feature]/maxs)*100
         formatted.append(canzone)
     return formatted
 
@@ -299,17 +308,30 @@ def playlistView(request,username,id=None,param="eff_energy"):
                             context["searched"][i]["artists_string"] = ", ".join(artists_string)
 
                 context["playlist"] = Playlist.objects.get(pk=id,user=user)
+                duration,context["hours"],context["minutes"],context["seconds"] = 0,0,0,0
+
                 context["canzoni"] = context["playlist"].canzone.all()
                 ids = list(map(lambda canzone: canzone["id"],context["canzoni"].values()))
                 if ids:
                     track_features = get_from_ids("audio-features",ids)
                     context["canzoni"] = format_playlist(context["playlist"],context["canzoni"],track_features,param)
                     context["canzoni"] = sorted(context["canzoni"], key=lambda d: d["ordine"])
-
-                    context["features"] = [c["param"] for c in context["canzoni"]]
-                    context["labels"] = ["" for i in range(len(context["features"]))]
-                context["param"] = {}
-                context["param"][param] = True
+                    duration = sum([c["duration"] for c in context["canzoni"]])
+                    m, context["seconds"] = divmod(duration, 60)
+                    h, m = divmod(m, 60)
+                    context["hours"], context["minutes"] = int(h), int(m)
+                    context["features"] = [c["feature"] for c in context["canzoni"]]
+                    context["labels"] = ["" for c in context["canzoni"]]
+                if context["playlist"].durata_min is not None:
+                    m, s = divmod(context["playlist"].durata_min, 60)
+                    h, m = divmod(m, 60)
+                    context["hours_min"], context["minutes_min"] = int(h), int(m)
+                    print(duration)
+                    print(context["playlist"].durata_min)
+                    if duration >= context["playlist"].durata_min:
+                        context["superata"] = True
+                context["param"] = {param:True}
+                context["tag"] = {context["playlist"].tag:True}
                 context["form"] = CoverForm()
                 return render(request, 'playlist.html', context=context)
             
@@ -341,6 +363,16 @@ def playlistView(request,username,id=None,param="eff_energy"):
                         playlist.nome = request.POST['nome']
                     elif request.POST['_name'] == 'desc':
                         playlist.desc = request.POST['desc']
+                    elif request.POST['_name'] == 'tag':
+                        playlist.tag = request.POST['tag']
+                        if request.POST['tag'] != "sport":
+                            playlist.energia_min = None
+                        if request.POST['tag'] != "viaggio":
+                            playlist.durata_min = None
+                    elif request.POST['_name'] == 'energy_min':
+                        playlist.energia_min = float(request.POST['_energy'])
+                    elif request.POST['_name'] == 'duration_min':
+                        playlist.durata_min = 3600 * int(request.POST['_hours'] or 0) + 60 * int(request.POST['_minutes'] or 0)
                     elif request.POST['_name'] == 'cover':
                         form = CoverForm(request.POST,request.FILES)
                         if form.is_valid():
