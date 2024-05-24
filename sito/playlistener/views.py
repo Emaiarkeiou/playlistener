@@ -33,6 +33,7 @@ def square_image(path, size):
         img = img.crop((left, top, right, bottom))
 
     img.thumbnail((size,size))  # Resize the image to size x size resolution
+    img = img.resize((size,size))
     img.save(path)
 
 """ 

@@ -237,9 +237,6 @@
 
           <button type="submit" class="btn btn-secondary p-0 col-12"><h6 class="my-2">Esporta</h6></button>
         </form>
-        
-
-        
 
       </div>
     </div>
@@ -251,7 +248,7 @@
 
 {% block content %}
 
-<div class="col-8 p-4 p-sm-5 pe-0 pe-sm-0">
+<div class="col-8 p-4 p-sm-5 pe-0 pe-sm-0" style="width: 66%;">
   <div class="row col-12 m-0 p-3 pt-0 bg-light rounded-3 border divider_shadow_in">
     {% for canzone in canzoni %}
       <!-- canzone: {id, nome, image, artists_string } -->
@@ -294,10 +291,9 @@
 </div>
 
 
-<div class="col-4 p-4 p-sm-5">
-
-  <div class="col-4 row position-fixed m-0 p-0 bg-light rounded-3 border divider_shadow_in bg-danger" style="width: 18vw; height:35vh;">
-    <div class="m-0 p-3 pb-0">
+<div class="col-4 p-4 p-sm-5 pb-sm-0 me-0" style="width: 34%;">
+  <div class="col-12 m-0 p-0 bg-light  rounded-3 border divider_shadow_in" style="height:35vh;">
+    <div class="m-0 p-3 pb-0" style="height:20%;">
       <select class="form-select" value="{{ param }}" onchange="document.location.href = `{% url 'playlist' user.get_username playlist.id %}/` + this.value">
         <option value="eff_energy" {% if param.eff_energy %} selected {% endif %}>Energia</option>
         <option value="danceability" {% if param.danceability %} selected {% endif %}>Ballabilità</option>
@@ -306,7 +302,7 @@
         <option value="loudness" {% if param.loudness %} selected {% endif %}>Volume</option>
       </select>
     </div>
-    <div class="m-0 pt-3 pe-4">
+    <div class="m-0 p-0 pt-2 pe-4" style="height:80%;">
       <canvas class="m-0 p-0" id="graph"></canvas>
     </div>
 </div>
@@ -327,7 +323,9 @@
       datasets: [{
         data: [{% for l in features %} '{{ l }}', {% endfor %}],
         borderColor: "rgba(0, 168, 107, 1)",
-        borderWidth: 5,
+        borderWidth: 4,
+        fill: true,
+        backgroundColor: "rgba(0, 168, 107, 0.5)"
       }]
     },
     options: {

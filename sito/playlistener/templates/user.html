@@ -70,7 +70,8 @@
       <div class="p-0 col-12">
         <div class="row col-12 p-0 m-0">
           <select class="form-select" value="{{ param }}" onchange="document.location.href = `{% url 'user' user.get_username %}/` + this.value">
-            <option disabled selected value> --seleziona un filtro--</option>
+            <option disabled value> --seleziona un filtro--</option>
+            <option selected></option>
             <option value="libero" {% if param.eff_energy %} selected {% endif %}>Libero</option>
             <option value="sport" {% if param.danceability %} selected {% endif %}>Sport</option>
             <option value="viaggio" {% if param.valence %} selected {% endif %}>Viaggio</option>
