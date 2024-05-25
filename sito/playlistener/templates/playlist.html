@@ -266,26 +266,77 @@
     <div class="modal-content" style="height: 75vh;">
       
       <div class="modal-body p-4">
-        <form method="post" action="{% url 'playlist' user.get_username playlist.id %}" class="m-0 p-0" style="height: 15%;">
+        <form method="post" action="{% url 'playlist' user.get_username playlist.id %}" class="row justify-content-center m-0 p-0" style="height: 100%;">
           {% csrf_token %}
           <input type="hidden" name="_method" value="PUT">
           <input type="hidden" name="_name" value="playlist">
-          <select class="form-select" name="_param">
-            <option value="eff_energy" {% if param.eff_energy %} selected {% endif %}>Energia</option>
-            <option value="danceability" {% if param.danceability %} selected {% endif %}>Ballabilità</option>
-            <option value="valence" {% if param.valence %} selected {% endif %}>Felicità</option>
-            <option value="acousticness" {% if param.acousticness %} selected {% endif %}>Acustica</option>
-            <option value="loudness" {% if param.loudness %} selected {% endif %}>Volume (dB)</option>
-          </select>
-          <input type="number" name="_p1" max="5" value=1>
-          <input type="number" name="_p2" max="5" value=2>
-          <input type="number" name="_p3" max="5" value=3>
-          <input type="number" name="_p4" max="5" value=4>
-          <input type="number" name="_p5" max="5" value=5>
-
-          <button type="submit" class="btn btn-secondary p-0 col-12"><h6 class="my-2">Esporta</h6></button>
+          <div class="col-12 p-4 pb-0" style="height: 75%;">
+            <div class="col-12 m-0 p-0 h-100 bg-light rounded-3 border divider_shadow_in">
+              <div class="m-0 p-3 pb-0" style="height:10%;">
+                <select class="form-select" name="_param">
+                  <option value="eff_energy" {% if param.eff_energy %} selected {% endif %}>Energia</option>
+                  <option value="danceability" {% if param.danceability %} selected {% endif %}>Ballabilità</option>
+                  <option value="valence" {% if param.valence %} selected {% endif %}>Felicità</option>
+                  <option value="acousticness" {% if param.acousticness %} selected {% endif %}>Acustica</option>
+                  <option value="loudness" {% if param.loudness %} selected {% endif %}>Volume (dB)</option>
+                </select>
+              </div>
+              <div class="m-0 p-0 pt-3 pe-4" style="height:90%;">
+                <canvas class="m-0 p-0" id="order_graph"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="row col-12 p-4" style="height: 10%;">
+            <div class="col-15 px-3">
+              <select class="form-select" name="_p1" onchange="change_order_graph();">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <div class="col-15 px-3">
+              <select class="form-select" name="_p2" onchange="change_order_graph();">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <div class="col-15 px-3">
+              <select class="form-select" name="_p3" onchange="change_order_graph();">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <div class="col-15 px-3">
+              <select class="form-select" name="_p4" onchange="change_order_graph();">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <div class="col-15 px-3">
+              <select class="form-select" name="_p5" onchange="change_order_graph();">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-12 p-4" style="height: 10%;">
+            <button type="submit" class="btn btn-primary p-0 col-12"><h6 class="my-2">Ordina</h6></button>
+          </div>
         </form>
-
       </div>
     </div>
   </div>
@@ -300,7 +351,7 @@
   <div class="row col-12 m-0 p-3 pt-0 bg-light rounded-3 border divider_shadow_in">
     {% for canzone in canzoni %}
       <!-- canzone: {id, nome, image, artists_string } -->
-      <div class="row col-12 m-0 p-2 px-0 mt-3 bg-white rounded divider_shadow pfp overflow-hidden">
+      <div class="row col-12 m-0 p-2 px-0 mt-3 {% if canzone.feature >= playlist.energia_min or not param.eff_energy %}bg-white{% else %}bg-gray{% endif %} rounded divider_shadow pfp overflow-hidden">
         <div class="row col-2 m-0 p-0">
           <p class="row col-7 justify-content-center align-items-center m-0 p-0">{{ canzone.ordine }}</p>
           <img src="{{ canzone.image }}" class="col-5 rounded m-0 p-0">
@@ -353,7 +404,9 @@
     <div class="m-0 p-0 pt-2 pe-4" style="height:80%;">
       <canvas class="m-0 p-0" id="graph"></canvas>
     </div>
+  </div>
 </div>
+
 {% endblock %}
 
 
@@ -368,7 +421,16 @@
     type: 'line',
     data: {
       labels: [{% for l in labels %} '{{ l }}', {% endfor %}],
-      datasets: [{
+      datasets: [
+      {% if playlist.energia_min and param.eff_energy %}
+      {
+        data: [{% for l in features %} '{{ playlist.energia_min }}', {% endfor %}],
+        borderColor: "rgba(212, 212, 212, 0.7)",
+        borderWidth: 2,
+        fill: true,
+        backgroundColor: "rgba(212,212,212,0.6)"
+      },{% endif %}
+        {
         data: [{% for l in features %} '{{ l }}', {% endfor %}],
         borderColor: "rgba(0, 168, 107, 1)",
         borderWidth: 4,
@@ -399,18 +461,57 @@ maintainAspectRatio: false,
         legend: {
           display: false
         }
-      },
-      layout: {
-        padding: {
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0
-        },
-
-    }
+      }
     }
   });
+</script>
+
+<script type="text/javascript">
+  const ctx_order = document.getElementById("order_graph");
+  const _p1 = document.getElementsByName("_p1")[0];
+  const _p2 = document.getElementsByName("_p2")[0];
+  const _p3 = document.getElementsByName("_p3")[0];
+  const _p4 = document.getElementsByName("_p4")[0];
+  const _p5 = document.getElementsByName("_p5")[0];
+  let graph = 0;
+  const change_order_graph = () => {
+    if (graph){graph.destroy()}
+    graph = new Chart(ctx_order, {
+      type: 'line',
+      data: {
+        labels: [{% for i in '12345'|make_list %} '{{ i }}', {% endfor %}],
+        datasets: [{
+          data: [{% for i in '12345'|make_list %} _p{{ i }}.value, {% endfor %}],
+          borderColor: "rgba(64, 181, 173, 1)",
+          borderWidth: 4,
+          fill: true,
+          backgroundColor: "rgba(64, 181, 173, 0.5)"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        tension:0.4,
+        scales: {
+
+          y: {
+            beginAtZero: true,
+            min:0,
+            max:6,
+            ticks: {
+              stepSize: 1
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+      }
+    });
+  };
+  change_order_graph();
 </script>
 
 {% if search %}
@@ -420,4 +521,5 @@ maintainAspectRatio: false,
   };
 </script>
 {% endif %}
+
 {% endblock %}

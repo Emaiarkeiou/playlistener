@@ -68,7 +68,7 @@ class Playlist(models.Model):
     nome = models.CharField(max_length=100, default="Nuova Playlist")
 
     tag = models.CharField(max_length=14,choices=tags,default="libero")
-    energia_min = models.FloatField(null=True,blank=True)
+    energia_min = models.FloatField(null=True,blank=True,default=0)
     durata_min = models.FloatField(null=True,blank=True)
 
     cover = models.ImageField(null=True,blank=True)

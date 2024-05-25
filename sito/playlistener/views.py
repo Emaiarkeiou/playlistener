@@ -383,11 +383,13 @@ def playlistView(request,username,id=None,param="eff_energy"):
                     elif request.POST['_name'] == 'tag':
                         playlist.tag = request.POST['tag']
                         if request.POST['tag'] != "sport":
-                            playlist.energia_min = None
+                            playlist.energia_min = 0
+                        else:
+                            playlist.energia_min = 3
                         if request.POST['tag'] != "viaggio":
                             playlist.durata_min = None
                     elif request.POST['_name'] == 'energy_min':
-                        playlist.energia_min = float(request.POST['_energy'])
+                        playlist.energia_min = float(request.POST['_energy'] or 0)
                     elif request.POST['_name'] == 'duration_min':
                         playlist.durata_min = 3600 * int(request.POST['_hours'] or 0) + 60 * int(request.POST['_minutes'] or 0)
                     elif request.POST['_name'] == 'cover':
