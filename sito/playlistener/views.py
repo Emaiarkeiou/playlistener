@@ -214,22 +214,25 @@ def editView(request):
 
 
 def logoutView(request):
+    global code
     response = redirect(loginView)
     if request.method == 'POST':
-        logout(request)
+        code = ""
         response.delete_cookie("access_token")
         response.delete_cookie("refresh_token")
+        logout(request)
     return response
 
 
 
 @cache_control(must_revalidate=True, no_store=True)
 def loginSpotifyView(request,username):
-    global verifier
+    global code,verifier
     response = redirect(loginView)
     if request.method == 'GET':
         if request.user.is_authenticated:
             if request.user.get_username() == username:
+                print("code: "+code)
                 if not code:
                     verifier,querystring = redirectToAuthCodeFlow("http://"+urlparse(request.build_absolute_uri()).netloc+"/playlistener/login/")
                     return redirect("https://accounts.spotify.com/authorize?"+querystring)
@@ -237,11 +240,13 @@ def loginSpotifyView(request,username):
                     access_token,refresh_token = getAccessToken(code,verifier,"http://"+urlparse(request.build_absolute_uri()).netloc+"/playlistener/login/")
                     response.set_cookie("access_token", access_token)
                     response.set_cookie("refresh_token", refresh_token)
+
     return response
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def userView(request,username,param="all"):
     """View function for home page of site."""
+    global code
     if request.user.is_authenticated:
         if request.user.get_username() == username:
             user = User.objects.get(username=username)
@@ -324,7 +329,7 @@ def format_search(songs,values,feature):
     maxs = max([v[feature] for v in values])
     formatted = []
     for song,value in zip(songs,values):
-        canzone = song ####################################################prendere solo cosa serve
+        canzone = song
         canzone["image"] = song["album"]["image"]
         artists_string = [d["name"] for d in song["artists"] if "name" in d]
         canzone["artists_string"] = ", ".join(artists_string)
@@ -335,7 +340,6 @@ def format_search(songs,values,feature):
         else:
             canzone["feature_perc"] = (value[feature]/maxs)*100
         formatted.append(canzone)
-        print(canzone)
     return formatted
 
 def get_ordine(playlist):
@@ -359,11 +363,16 @@ def scala_ordini(n,playlist):
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def playlistView(request,username,id=None,param="eff_energy",exported = False):
+    global code
     if request.user.is_authenticated:
         if request.user.get_username() == username:
             user = User.objects.get(username=username)
             if request.method == 'GET':
                 context = {'media_root': settings.MEDIA_URL,"exported":exported}
+                context["playlist"] = Playlist.objects.get(pk=id,user=user)
+                context["canzoni"] = context["playlist"].canzone.all()
+                ids = list(map(lambda canzone: canzone["id"],context["canzoni"].values()))
+
                 if request.GET.get('name') == "song":
                     if request.GET.get('search'):
                         context["search"] = request.GET.get('search')
@@ -371,22 +380,19 @@ def playlistView(request,username,id=None,param="eff_energy",exported = False):
                             searched = get_search(context["search"][1:-1],tracks=True,n=20)                         #Cerca SOLO canzoni con QUEL titolo
                             context["searched"] = order_popularity(context["search"][1:-1],True,searched["tracks"],10,50)
                         else:
-                            searched = get_search(context["search"],tracks=True,albums=True,artists=True,n=10)
+                            searched = get_search(context["search"],tracks=True,albums=True,artists=True,n=5)
                             context["searched"] = order_popularity(context["search"],False,searched["tracks"]+searched["albums"]+searched["artists"],10,50)
-                        ids = [c["id"] for c in context["searched"]]
-                        track_features = get_from_ids("audio-features",ids)
+                        context["searched"] = [c for c in context["searched"] if c["id"] not in ids]
+                        ids_searched = [c["id"] for c in context["searched"]]
+                        track_features = get_from_ids("audio-features",ids_searched)
                         context["searched"] = format_search(context["searched"],track_features,"eff_energy")
                         request.session["search"] = context["search"]
                         request.session["searched"] = context["searched"]
                     else:
                         context["search"] = request.session["search"]
-                        context["searched"] = request.session["searched"]
+                        context["searched"] = [c for c in request.session["searched"] if c["id"] not in ids]
 
-                context["playlist"] = Playlist.objects.get(pk=id,user=user)
                 duration,context["hours"],context["minutes"],context["seconds"] = 0,0,0,0
-
-                context["canzoni"] = context["playlist"].canzone.all()
-                ids = list(map(lambda canzone: canzone["id"],context["canzoni"].values()))
                 if ids:
                     track_features = get_from_ids("audio-features",ids)
                     context["canzoni"] = format_playlist(context["playlist"],context["canzoni"],track_features,param)
@@ -397,6 +403,7 @@ def playlistView(request,username,id=None,param="eff_energy",exported = False):
                     context["hours"], context["minutes"] = int(h), int(m)
                     context["features"] = [c["feature"] for c in context["canzoni"]]
                     context["labels"] = ["" for c in context["canzoni"]]
+
                 if context["playlist"].durata_min is not None:
                     m, s = divmod(context["playlist"].durata_min, 60)
                     h, m = divmod(m, 60)
@@ -434,18 +441,18 @@ def playlistView(request,username,id=None,param="eff_energy",exported = False):
                         #Export playlist
                         access_token = request.COOKIES.get("access_token","")
                         if access_token:
-                            """try:"""
-                            ids = get_ordine(playlist)
-                            spotify_user = get_spotify_user(access_token)
-                            resp = export_playlist(access_token,spotify_user["id"],playlist,ids)
-                            return redirect(playlistView, username, id, param,resp)
-                            """ except:
+                            try:
+                                ids = get_ordine(playlist)
+                                spotify_user = get_spotify_user(access_token)
+                                resp = export_playlist(access_token,spotify_user["id"],playlist,ids)
+                                return redirect(playlistView, username, id, param,resp)
+                            except:
                                 print("ERRORE ACCESS_TOKEN Export")
                                 code = ""
                                 response = redirect(loginSpotifyView,request.user.get_username())
                                 response.delete_cookie("access_token")
                                 response.delete_cookie("refresh_token")
-                                return response"""
+                                return response
                         else:
                             return redirect(loginSpotifyView,request.user.get_username())
 

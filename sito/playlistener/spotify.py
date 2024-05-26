@@ -212,7 +212,10 @@ def export_playlist(access_token,id_user,playlist,ids):
                "Content-Type":"application/json"}
     result = post(url,headers=headers,data=json.dumps({"name":playlist.nome,"description":playlist.desc}))
     json_result = json.loads(result.content)
-    return add_songs(access_token,json_result["id"],ids)
+    if ids:
+        return add_songs(access_token,json_result["id"],ids)
+    else:
+        return result.status_code // 100 == 2
 
 def add_songs(access_token,id_playlist,ids):
     def divide_chunks(l, n): 
