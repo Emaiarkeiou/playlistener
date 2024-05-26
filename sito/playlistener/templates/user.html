@@ -30,10 +30,27 @@
       </a>
   </div>
 
-  <div class="text-truncate m-4 ms-0 w-100">
-    <h4 class="m-0 text-capitalize">{{ user.get_full_name }}</h4>
-    <h5 class="">@{{ user.get_username }}</h5>
+  <div class="text-truncate m-4 ms-0 w-100 h-100">
+    <h4 class="m-0 p-0 text-capitalize" style="height: 10%;">{{ user.get_full_name }}</h4>
+    <h5 class="m-0 p-0" style="height: 10%;">@{{ user.get_username }}</h5>
+    <div class="col-12 m-0 pb-4" style="height: 80%;">
+      <div class="col-12 m-0 pt-3 pb-4 h-100">
+        <a href="{% url 'login_spotify' user.get_username %}" class="m-0 p-0">
+          <div class="row col-12 div-spotify rounded m-0 p-0 h-100 justify-content-center align-items-center">
+            <img class="img-fluid col-2" src="{% static 'images/Spotify_Icon_RGB_Green.png' %}">#########Fare piu rounded, scritta centrata, colore,senza underline
+            <h5 class="col-10 py-2"><b>Login Spotify</b></h5>
+          </div>
+          {% if access_token %}
+          {% else %}
+
+          {% endif %}
+
+        </a>
+      </div>
+    </div>
+    
   </div>
+  
 </div>
 
 

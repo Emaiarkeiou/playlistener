@@ -1,10 +1,16 @@
+from django.http import HttpResponseRedirect
 import os
+import re
 import base64
 from requests import post,get
 import json
 from difflib import SequenceMatcher
 import math
 from itertools import islice,chain
+
+import random
+import hashlib
+from urllib.parse import urlencode
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
@@ -13,6 +19,37 @@ client_id = "6159386c92a9417aac8dee56ff9df305"
 client_secret = "a901979879f048f9889c3c1933d2526b"
 
 """ Authorization """
+
+def redirectToAuthCodeFlow(uri):
+    verifier = base64.urlsafe_b64encode(os.urandom(40)).decode('utf-8')
+    verifier = re.sub('[^a-zA-Z0-9]+', '', verifier)
+    challenge = hashlib.sha256(verifier.encode('utf-8')).digest()
+    challenge = base64.urlsafe_b64encode(challenge).decode('utf-8')
+    challenge = challenge.replace('=', '')
+
+    params = {"client_id":client_id,
+              "response_type":"code",
+              "redirect_uri":uri,
+              "scope":"playlist-read-private playlist-modify-public playlist-modify-private ugc-image-upload user-read-private user-read-email",
+              "code_challenge_method":"S256",
+              "code_challenge":challenge}
+    return verifier,urlencode(params)
+    
+
+def getAccessToken(code,verifier,uri):
+    params = {"client_id":client_id,
+              "grant_type":"authorization_code",
+              "code":code,
+              "redirect_uri":uri,
+              "code_verifier":verifier}
+    url = "https://accounts.spotify.com/api/token"
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    result = post(url,headers=headers, data=params)
+    json_result = json.loads(result.content)
+    return json_result["access_token"],json_result["refresh_token"]
+
 
 def get_token():
     auth_string = client_id +":"+client_secret
@@ -32,7 +69,7 @@ def get_token():
     return token
 
 def get_auth_header():
-    return {"Authorization":"Bearer " + token}
+    return {"Authorization":"Bearer " + get_token()}
 
 
 
@@ -264,5 +301,3 @@ def calculate_eff_energy_closerability(tracks_features):
                      closerability = - .5*track["acousticness"] + .3*track["danceability"] - .3*track["energy"] + 0.8
                 ) for track in tracks_features]
     return features
-
-token = get_token()

@@ -201,7 +201,7 @@
         <form method="get" action="{{ request.path }}" class="m-0 p-0" style="height: 10%;" autocomplete="off">
           <input type="hidden" name="name" value="song">
           <div class="col-12 input-group p-0 m-0">
-            <input type="text" class="form-control" name="search" placeholder="Canzone, Album o Artista" value="{{ search }}">
+            <input type="text" class="form-control" name="search" placeholder='Canzone, Album o Artista (usare le virgolette "" per cercare una canzone specifica)' value="{{ search }}">
             <div class="input-group-append p-0 m-0">
               <button class="btn btn-primary p-0 m-0 search_btn" type="submit">
                 <h6 class="my-2 px-2">
@@ -218,7 +218,6 @@
           <div class="col-12 m-0 p-3 pt-0 h-100 bg-light rounded-2 border divider_shadow_in overflow-auto">
             <!-- track: {id, name, popularity, type,duration,feature,feature_perc,artists_string } -->
             {% for track in searched %}
-
               <div class="row col-12 m-0 p-2 mt-3 {% if track.feature >= playlist.energia_min %}bg-white{% else %}bg-gray{% endif %} rounded divider_shadow pfp">
 
                 <img src="{{ track.album.image }}" class="col-1 rounded m-0 p-0">
@@ -230,8 +229,8 @@
                   </p>
                 </div>
 
-                <div class="col-5 m-0 p-0">
-                    
+                <div class="col-5 m-0 p-1 my-1 rounded border">
+                  <span class="d-flex h-100 rounded text-dark p-2 align-items-center" style="width: {{track.feature_perc}}%;">Energia=<b> {{track.feature|floatformat:2}}</b></span>
                 </div>
 
                 <form method="post" action="{{ request.path }}" class="d-flex col-1 m-0  p-0 justify-content-center align-items-center">

@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
@@ -12,6 +13,7 @@ from .forms import *
 from PIL import Image
 
 from .spotify import *
+from urllib.parse import urlparse
 
 def square_image(path, size):
     img = Image.open(path)
@@ -85,6 +87,11 @@ def delete_song_related(sender, instance, **kwargs):
             break
     instance.artista.clear()
 
+code,verifier = "",""
+
+def getAToken(request):
+    return request.COOKIES["access_token"]
+
 
 """
 
@@ -97,11 +104,16 @@ POST PER LE FORM E BOTTONI SUBMIT(per input)
 
 @cache_control(must_revalidate=True, no_store=True)
 def loginView(request):
+    global code
     context={}
     if request.method == 'GET':
         """ GET della pagina di login """
         if request.user.is_authenticated:
-            return redirect(userView,request.user.get_username())
+            if request.GET.get('code'):
+                code = request.GET.get('code')
+                return redirect(loginSpotifyView,request.user.get_username())
+            else:
+                return redirect(userView,request.user.get_username())
         else:
             return render(request, 'registration/login.html')
     elif request.method == 'POST':
@@ -206,11 +218,30 @@ def editView(request):
 
 
 def logoutView(request):
+    response = redirect(loginView)
     if request.method == 'POST':
         logout(request)
-    return redirect(loginView)
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
+    return response
 
 
+
+@cache_control(must_revalidate=True, no_store=True)
+def loginSpotifyView(request,username):
+    global verifier
+    response = redirect(loginView)
+    if request.method == 'GET':
+        if request.user.is_authenticated:
+            if request.user.get_username() == username:
+                if not code:
+                    verifier,querystring = redirectToAuthCodeFlow("http://"+urlparse(request.build_absolute_uri()).netloc+"/playlistener/login/")
+                    return redirect("https://accounts.spotify.com/authorize?"+querystring)
+                else:
+                    access_token,refresh_token = getAccessToken(code,verifier,"http://"+urlparse(request.build_absolute_uri()).netloc+"/playlistener/login/")
+                    response.set_cookie("access_token", access_token)
+                    response.set_cookie("refresh_token", refresh_token)
+    return response
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def userView(request,username,param="all"):
@@ -219,7 +250,15 @@ def userView(request,username,param="all"):
         if request.user.get_username() == username:
             user = User.objects.get(username=username)
             if request.method == 'GET':
-                search = request.GET.get('name') if request.GET.get('name') else ""
+                context = {'media_root': settings.MEDIA_URL}
+
+                access_token = request.COOKIES.get("access_token","")
+                if access_token:
+                    context["access_token"] = "aaaaaaaa"
+                else:
+                    context["access_token"] = ""
+                search = request.GET.get("name","")
+                context["search"] = search
                 if search:
                     if param == "all":
                         playlists = Playlist.objects.filter(user_id=user.id, nome__contains = search).order_by("-id")
@@ -230,10 +269,12 @@ def userView(request,username,param="all"):
                         playlists = Playlist.objects.filter(user_id=user.id).order_by("-id") 
                     else:
                         playlists = Playlist.objects.filter(user_id=user.id, tag=param).order_by("-id")
+                context["playlists"] = playlists
+                context["param"] = {param:True}
+                context["form"] = CoverForm()
                 form = PfpForm()
                 
-                return render(request, 'user.html', context={"form":form,"playlists":playlists,'search':search,
-                                                             'media_root': settings.MEDIA_URL,'param':{param:True}})
+                return render(request, 'user.html', context=context)
             elif request.method == 'POST':
                 if request.POST['_method'] == 'PUT':
                     form = PfpForm(request.POST,request.FILES)
