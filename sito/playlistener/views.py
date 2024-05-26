@@ -252,12 +252,13 @@ def userView(request,username,param="all"):
             user = User.objects.get(username=username)
             if request.method == 'GET':
                 context = {'media_root': settings.MEDIA_URL}
-
                 access_token = request.COOKIES.get("access_token","")
                 if access_token:
                     context["access_token"] = True
                     try:
                         spotify_user = get_spotify_user(access_token)
+                        context["display_name"] = spotify_user["display_name"]
+                        context["spotify_email"] = spotify_user["email"]
                     except:
                         print("ERRORE ACCESS_TOKEN")
                         code = ""
@@ -265,8 +266,6 @@ def userView(request,username,param="all"):
                         response.delete_cookie("access_token")
                         response.delete_cookie("refresh_token")
                         return response
-                    context["display_name"] = spotify_user["display_name"]
-                    context["spotify_email"] = spotify_user["email"]
                 else:
                     context["access_token"] = False
                 search = request.GET.get("name","")
