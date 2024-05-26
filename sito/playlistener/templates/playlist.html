@@ -108,7 +108,9 @@
   </div>
 
   <div class="row col-12">
-
+    {% if exported %}
+      <label class="col-12 m-0 p-0 pe-4 pb-2 text-end">Playlist esportata</label>
+    {% endif %}
     <div class="d-flex row px-4 m-0 col-6 align-items-end">
       {% if superata %}
         <label class="col-12 text-end m-0 w-100 text-success"><b>Durata: {{ hours }}h {{ minutes }}m {{ seconds|floatformat:0 }}s</b></label>
@@ -122,7 +124,7 @@
     <div class="d-flex row px-4 m-0 col-6 align-items-end">
 
       <div class="row col-12 p-0 m-0 mb-3">
-        
+
         <form class="col-6 m-0 p-0 pe-2" method="post" action="{% url 'playlist' user.get_username playlist.id %}">
           {% csrf_token %}
           <input type="hidden" name="_method" value="DELETE">
@@ -130,8 +132,11 @@
           <button type="submit" class="btn btn-danger p-0 col-12"><h6 class="my-2">Elimina</h6></button>
         </form>
 
-        <form class="col-6 m-0 p-0 ps-2" method="get" action="{% url 'login' %}">
-          <button type="submit" class="btn btn-secondary p-0 col-12"><h6 class="my-2">Esporta</h6></button>
+        <form class="col-6 m-0 p-0 ps-2" method="post" action="{% url 'playlist' user.get_username playlist.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="_method" value="POST">
+          <input type="hidden" name="_name" value="playlist">
+          <button type="submit" class="spotify-btn rounded h-100 p-0 col-12"><h6 class="my-2">Esporta</h6></button>
         </form>
       </div>
 
@@ -405,6 +410,7 @@
     </div>
   </div>
 </div>
+
 
 {% endblock %}
 

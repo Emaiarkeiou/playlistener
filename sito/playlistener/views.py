@@ -89,10 +89,6 @@ def delete_song_related(sender, instance, **kwargs):
 
 code,verifier = "",""
 
-def getAToken(request):
-    return request.COOKIES["access_token"]
-
-
 """
 
 GET PER I LINK/REDIRECT
@@ -254,9 +250,20 @@ def userView(request,username,param="all"):
 
                 access_token = request.COOKIES.get("access_token","")
                 if access_token:
-                    context["access_token"] = "aaaaaaaa"
+                    context["access_token"] = True
+                    try:
+                        spotify_user = get_spotify_user(access_token)
+                    except:
+                        print("ERRORE ACCESS_TOKEN")
+                        code = ""
+                        response = redirect(loginSpotifyView,request.user.get_username())
+                        response.delete_cookie("access_token")
+                        response.delete_cookie("refresh_token")
+                        return response
+                    context["display_name"] = spotify_user["display_name"]
+                    context["spotify_email"] = spotify_user["email"]
                 else:
-                    context["access_token"] = ""
+                    context["access_token"] = False
                 search = request.GET.get("name","")
                 context["search"] = search
                 if search:
@@ -331,6 +338,14 @@ def format_search(songs,values,feature):
         print(canzone)
     return formatted
 
+def get_ordine(playlist):
+    ids = []
+    ordini = Ordine.objects.filter(playlist=playlist).order_by("n")
+    for o in ordini:
+        ids.append(o.canzone_id)
+    return ids
+
+
 def ordina(playlist,ordini,feature):
     for i in range(len(ordini)):
         canzone = Canzone.objects.get(id=ordini[i]["id"])
@@ -343,12 +358,12 @@ def scala_ordini(n,playlist):
     Ordine.objects.filter(playlist=playlist,n__gt=n).update(n=F('n') - 1)
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
-def playlistView(request,username,id=None,param="eff_energy"):
+def playlistView(request,username,id=None,param="eff_energy",exported = False):
     if request.user.is_authenticated:
         if request.user.get_username() == username:
             user = User.objects.get(username=username)
             if request.method == 'GET':
-                context = {'media_root': settings.MEDIA_URL}
+                context = {'media_root': settings.MEDIA_URL,"exported":exported}
                 if request.GET.get('name') == "song":
                     if request.GET.get('search'):
                         context["search"] = request.GET.get('search')
@@ -401,6 +416,7 @@ def playlistView(request,username,id=None,param="eff_energy"):
                 elif request.POST['_method'] == 'POST':
                     playlist = Playlist.objects.get(pk=id,user=user)
                     if request.POST['_name'] == 'song':
+                        #ADD song to playlist
                         """ track: {id, nome, popularity, type,album{id,image,name},artists[{id,name }],artists_string } """
                         track = eval(request.POST['_track'])
                         if track["album"]["image"] and track["artists"]:
@@ -414,6 +430,24 @@ def playlistView(request,username,id=None,param="eff_energy"):
                             canzone.artista.add(*[a.id for a in artisti])
                             playlist.canzone.add(canzone.id,through_defaults={'n': playlist.canzone.all().count()})
                         return redirect(request.path_info+"?name=song")
+                    elif request.POST['_name'] == 'playlist':
+                        #Export playlist
+                        access_token = request.COOKIES.get("access_token","")
+                        if access_token:
+                            """try:"""
+                            ids = get_ordine(playlist)
+                            spotify_user = get_spotify_user(access_token)
+                            resp = export_playlist(access_token,spotify_user["id"],playlist,ids)
+                            return redirect(playlistView, username, id, param,resp)
+                            """ except:
+                                print("ERRORE ACCESS_TOKEN Export")
+                                code = ""
+                                response = redirect(loginSpotifyView,request.user.get_username())
+                                response.delete_cookie("access_token")
+                                response.delete_cookie("refresh_token")
+                                return response"""
+                        else:
+                            return redirect(loginSpotifyView,request.user.get_username())
 
                 elif request.POST['_method'] == 'PUT':
                     playlist = Playlist.objects.get(pk=id,user=user)

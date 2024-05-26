@@ -239,4 +239,29 @@ textarea {
 
 .div-spotify {
   background: rgba(25,20,20,1);
+  color:rgba(30,215,96,1);
+  text-decoration: none;
 }
+
+
+.link-spotify {
+  text-decoration: none;
+}
+
+.border-spotify {
+  border: 1px solid rgba(25,20,20,0.5);
+  box-shadow: inset 0 10px 35px 0px rgba(25,20,20,0.5), inset 0px 2px 5px rgba(25,20,20,0.5);
+}
+
+.spotify-btn {
+  background: rgba(25,20,20,1);
+  color:rgba(30,215,96,1);
+  border: none;
+}
+
+.spotify-btn:hover {
+  background: rgba(25,20,20,0.9);
+  color:rgba(30,215,96,1);
+  border: none;
+}
+

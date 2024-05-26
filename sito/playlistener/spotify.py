@@ -1,8 +1,7 @@
-from django.http import HttpResponseRedirect
 import os
 import re
 import base64
-from requests import post,get
+from requests import post,get,codes
 import json
 from difflib import SequenceMatcher
 import math
@@ -12,15 +11,16 @@ import random
 import hashlib
 from urllib.parse import urlencode
 
-def similar(a, b):
-    return SequenceMatcher(None, a, b).ratio()
-
 client_id = "6159386c92a9417aac8dee56ff9df305"
 client_secret = "a901979879f048f9889c3c1933d2526b"
+
+def similar(a, b):
+    return SequenceMatcher(None, a, b).ratio()
 
 """ Authorization """
 
 def redirectToAuthCodeFlow(uri):
+    #Per utente spotify
     verifier = base64.urlsafe_b64encode(os.urandom(40)).decode('utf-8')
     verifier = re.sub('[^a-zA-Z0-9]+', '', verifier)
     challenge = hashlib.sha256(verifier.encode('utf-8')).digest()
@@ -37,6 +37,7 @@ def redirectToAuthCodeFlow(uri):
     
 
 def getAccessToken(code,verifier,uri):
+    #Per utente spotify
     params = {"client_id":client_id,
               "grant_type":"authorization_code",
               "code":code,
@@ -52,6 +53,7 @@ def getAccessToken(code,verifier,uri):
 
 
 def get_token():
+    #Per richieste normali API
     auth_string = client_id +":"+client_secret
     auth_bytes = auth_string.encode("utf-8")
     auth_base64= str(base64.b64encode(auth_bytes), "utf-8")
@@ -137,7 +139,7 @@ def remove_duplicates_id(lista):
     return new
 
 
-""" Get """
+""" GET """
 
 def get_artist_top_tracks(artist,n):
     """ Get informazioni base delle top canzoni di 1 artista """
@@ -194,7 +196,36 @@ def get_from_ids(param,ids):
         response = list(map(lambda d: dict((k, d[k]) for k in keys if k in d),response))
     return response
 
+def get_spotify_user(access_token):
+    url = "https://api.spotify.com/v1/me"
+    headers = {"Authorization":"Bearer " + access_token}
+    result = get(url,headers=headers)
+    json_result = json.loads(result.content)
+    keys = ["display_name","id","email","images"]
+    return dict((k, json_result[k]) for k in keys if k in json_result)
 
+
+""" POST """
+def export_playlist(access_token,id_user,playlist,ids):
+    url = "https://api.spotify.com/v1/users/"+id_user+"/playlists"
+    headers = {"Authorization":"Bearer " + access_token,
+               "Content-Type":"application/json"}
+    result = post(url,headers=headers,data=json.dumps({"name":playlist.nome,"description":playlist.desc}))
+    json_result = json.loads(result.content)
+    return add_songs(access_token,json_result["id"],ids)
+
+def add_songs(access_token,id_playlist,ids):
+    def divide_chunks(l, n): 
+        for i in range(0, len(l), n):  
+            yield l[i:i + n] 
+    url = "https://api.spotify.com/v1/playlists/"+id_playlist+"/tracks"
+    headers = {"Authorization":"Bearer " + access_token,
+               "Content-Type":"application/json"}
+    ids = list(divide_chunks(ids,100)) 
+    for chunk in ids:
+        uris = ["spotify:track:"+id for id in chunk]
+        result = post(url,headers=headers,data=json.dumps({"uris":uris}))
+    return result.status_code // 100 == 2
 
 """ Ordinamenti """
 
@@ -273,8 +304,6 @@ def order_playlist(tracks,feature,punti):
                     tracks[j] = list(reversed(list(sorted(y, key=lambda d: d[feature]))))
 
         return list(chain.from_iterable(tracks))  
-    
-
 
 def divide(n,perc):
     floored = list(map(math.floor,perc))
@@ -301,3 +330,6 @@ def calculate_eff_energy_closerability(tracks_features):
                      closerability = - .5*track["acousticness"] + .3*track["danceability"] - .3*track["energy"] + 0.8
                 ) for track in tracks_features]
     return features
+
+
+
