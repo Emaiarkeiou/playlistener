@@ -376,19 +376,22 @@ def playlistView(request,username,id=None,param="eff_energy",exported = False):
                     if request.GET.get('search'):
                         context["search"] = request.GET.get('search')
                         if context["search"].startswith(("\"", "\'")) and context["search"].endswith(("\"", "\'")): #Se la stringa è compresa tra virgolette
-                            searched = get_search(context["search"][1:-1],tracks=True,n=20)                         #Cerca SOLO canzoni con QUEL titolo
-                            context["searched"] = order_popularity(context["search"][1:-1],True,searched["tracks"],10,50)
+                            searched = get_search(context["search"][1:-1].rstrip(),tracks=True,n=20)                         #Cerca SOLO canzoni con QUEL titolo
+                            context["searched"] = order_popularity(context["search"][1:-1].rstrip(),True,searched["tracks"],10,50)
                         else:
-                            searched = get_search(context["search"],tracks=True,albums=True,artists=True,n=5)
-                            context["searched"] = order_popularity(context["search"],False,searched["tracks"]+searched["albums"]+searched["artists"],10,50)
+                            searched = get_search(context["search"].rstrip(),tracks=True,albums=True,artists=True,n=5)
+                            context["searched"] = order_popularity(context["search"].rstrip(),False,searched["tracks"]+searched["albums"]+searched["artists"],10,50)
                         context["searched"] = [c for c in context["searched"] if c["id"] not in ids]
                         ids_searched = [c["id"] for c in context["searched"]]
                         track_features = get_from_ids("audio-features",ids_searched)
-                        context["searched"] = format_search(context["searched"],track_features,"eff_energy")
-                        request.session["search"] = context["search"]
+                        try:
+                            context["searched"] = format_search(context["searched"],track_features,"eff_energy")
+                        except:
+                            print("ERRORE FORMAT")
+                        request.session["search"] = context["search"].rstrip()
                         request.session["searched"] = context["searched"]
                     else:
-                        context["search"] = request.session["search"]
+                        context["search"] = request.session["search"].rstrip()
                         context["searched"] = [c for c in request.session["searched"] if c["id"] not in ids]
 
                 duration,context["hours"],context["minutes"],context["seconds"] = 0,0,0,0

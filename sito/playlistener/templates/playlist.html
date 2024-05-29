@@ -39,12 +39,12 @@
         <input type="text" name="nome" value="{{ playlist.nome }}" maxlength="100" onchange="this.form.submit();" class="p-0 m-0 w-100 fw-bold" style="outline: 0; border:0;">
       </form>
     </h4>
-    <div class="row col-12 m-0 py-2" style="height: 25%;">
+    <div class="row col-12 m-0 py-2" style="height: 30%;">
       <form method="post" action="{% url 'playlist' user.get_username playlist.id %}" class="p-0 m-0 col-4 h-100">
         {% csrf_token %}
         <input type="hidden" name="_method" value="PUT">
         <input type="hidden" name="_name" value="tag">
-        <select class="form-select h-100" name="tag" onchange="this.form.submit()">
+        <select class="form-select h-100 p-0 px-2 m-0" name="tag" onchange="this.form.submit()">
           <option value="libero" {% if tag.libero %} selected {% endif %}>#libero</option>
           <option value="sport" {% if tag.sport %} selected {% endif %}>#sport</option>
           <option value="viaggio" {% if tag.viaggio %} selected {% endif %}>#viaggio</option>
@@ -86,7 +86,7 @@
     </div>
     
     
-    <form  class="m-0 p-0" method="post" action="{% url 'playlist' user.get_username playlist.id %}" style="height: 60%;">
+    <form  class="m-0 p-0" method="post" action="{% url 'playlist' user.get_username playlist.id %}" style="height: 55%;">
       {% csrf_token %}
       <input type="hidden" name="_method" value="PUT">
       <input type="hidden" name="_name" value="desc">

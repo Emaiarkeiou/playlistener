@@ -39,7 +39,7 @@
           <div class="row m-0 px-4 px-sm-5 bg-light rounded-3 border divider_shadow_in justify-content-center align-items-center h-100 ">
             <a href="{% url 'login_spotify' user.get_username %}" class="row link-spotify m-0 p-0 justify-content-center">
               <div class="row col-10 div-spotify rounded divider_shadow m-0 p-0 justify-content-center align-items-center">
-                <img class="img-fluid col-3 my-3" src="{% static 'images/Spotify_Icon_RGB_Green.png' %}">
+                <img class="img-fluid col-3 my-2" src="{% static 'images/Spotify_Icon_RGB_Green.png' %}">
                 <h5 class="col-9 text-start text-justify text-truncate m-0 p-0"><b>Connettiti a Spotify</b></h5>
               </div>
             </a>
@@ -47,13 +47,13 @@
         </div>
       {% else %}
         <div class="col-12 m-0 p-0 pt-2 pb-4 h-100">
-          <div class="row m-0 p-0 div-spotify rounded-3 border justify-content-center align-items-center flex-column h-100 ">
-            <a href="{% url 'login_spotify' user.get_username %}" class="row link-spotify h-100 m-0 p-0 justify-content-center">
-              <div class="row col-12 div-spotify rounded mb-auto p-3 justify-content-start align-items-center">
-                <h4 class="m-0 p-0 text-truncate" style="height: 10%;">{{ display_name }}</h4>
-                <h5 class="m-0 p-0 text-truncate" style="height: 10%;">{{ spotify_email }}</h5>
+          <div class="row m-0 py-2 px-3 div-spotify rounded-3 border justify-content-center align-items-center flex-column h-100">
+            <a href="" class="row link-spotify h-100 m-0 p-0 justify-content-center">
+              <div class="row col-12 div-spotify rounded m-0 mb-auto p-0 justify-content-start align-items-center" style="height: 60%;">
+                <h4 class="m-0 p-0 text-truncate" style="height: 50%;">{{ display_name }}</h4>
+                <h5 class="m-0 p-0 text-truncate" style="height: 50%;">{{ spotify_email }}</h5>
               </div>
-              <div class="row col-12 mt-auto p-3 justify-content-end align-items-center">
+              <div class="row col-12 m-0 mt-auto p-0 justify-content-end align-items-center" style="height: 40%;">
                 <img class="img-fluid col-3 m-0 p-0" src="{% static 'images/Spotify_Logo_RGB_Green.png' %}">
               </div>
             </a>
