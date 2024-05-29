@@ -282,9 +282,7 @@ def userView(request,username,param="all"):
                         playlists = Playlist.objects.filter(user_id=user.id, tag=param).order_by("-id")
                 context["playlists"] = playlists
                 context["param"] = {param:True}
-                context["form"] = CoverForm()
-                form = PfpForm()
-                
+                context["form"] = PfpForm()                
                 return render(request, 'user.html', context=context)
             elif request.method == 'POST':
                 if request.POST['_method'] == 'PUT':
