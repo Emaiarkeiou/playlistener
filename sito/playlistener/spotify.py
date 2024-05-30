@@ -11,8 +11,18 @@ import random
 import hashlib
 from urllib.parse import urlencode
 
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
 client_id = "6159386c92a9417aac8dee56ff9df305"
 client_secret = "a901979879f048f9889c3c1933d2526b"
+
+session = requests.Session()
+retry = Retry(connect=3, backoff_factor=0.5)
+adapter = HTTPAdapter(max_retries=retry)
+session.mount('http://', adapter)
+session.mount('https://', adapter)
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
@@ -47,7 +57,7 @@ def getAccessToken(code,verifier,uri):
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
     }
-    result = post(url,headers=headers, data=params)
+    result = session.post(url,headers=headers, data=params)
     json_result = json.loads(result.content)
     return json_result["access_token"],json_result["refresh_token"]
 
@@ -65,7 +75,7 @@ def get_token():
     }
     data = {"grant_type":"client_credentials"}
     
-    result = post(url,headers=headers, data=data)
+    result = session.post(url,headers=headers, data=data)
     json_result = json.loads(result.content)
     token = json_result["access_token"]
     return token
@@ -87,7 +97,7 @@ def get_search(string,tracks=False,albums=False,artists=False,n=1):
         types = ["track" if tracks else "", "album" if albums else "", "artist" if artists else ""]
         types = "%2C".join(string for string in types if string)
         url += f"?q={string}&type={types}&limit={n}"
-        result = get(url,headers=headers)
+        result = session.get(url,headers=headers)
         json_result = json.loads(result.content)
         keys = ["id","name","popularity","type"]
         if tracks:
@@ -145,7 +155,7 @@ def get_artist_top_tracks(artist,n):
     """ Get informazioni base delle top canzoni di 1 artista """
     url = "https://api.spotify.com/v1/artists/" + artist["id"] + "/top-tracks"
     headers = get_auth_header()
-    result = get(url,headers=headers)
+    result = session.get(url,headers=headers)
     json_result = json.loads(result.content)
     keys = ["id","name","duration_ms"]
     return list(map(lambda d: dict((k, d[k]) for k in keys if k in d) 
@@ -171,7 +181,7 @@ def get_from_id(param,id):
     """ param = tracks,albums,artists,audio-features,... """
     url = "https://api.spotify.com/v1/" + param + "/" + id
     headers = get_auth_header()
-    result = get(url,headers=headers)
+    result = session.get(url,headers=headers)
     json_result = json.loads(result.content)
     return json_result
 
@@ -187,7 +197,7 @@ def get_from_ids(param,ids):
     for chunk in chunks:
         url = "https://api.spotify.com/v1/" + param + "?ids=" + "%2C".join(chunk)
         headers = get_auth_header()
-        result = get(url,headers=headers)
+        result = session.get(url,headers=headers)
         response += json.loads(result.content)[param.replace("-","_")]
     
     if param == "audio-features":
@@ -199,7 +209,7 @@ def get_from_ids(param,ids):
 def get_spotify_user(access_token):
     url = "https://api.spotify.com/v1/me"
     headers = {"Authorization":"Bearer " + access_token}
-    result = get(url,headers=headers)
+    result = session.get(url,headers=headers)
     json_result = json.loads(result.content)
     keys = ["display_name","id","email","images"]
     return dict((k, json_result[k]) for k in keys if k in json_result)
@@ -210,7 +220,7 @@ def export_playlist(access_token,id_user,playlist,ids):
     url = "https://api.spotify.com/v1/users/"+id_user+"/playlists"
     headers = {"Authorization":"Bearer " + access_token,
                "Content-Type":"application/json"}
-    result = post(url,headers=headers,data=json.dumps({"name":playlist.nome,"description":playlist.desc}))
+    result = session.post(url,headers=headers,data=json.dumps({"name":playlist.nome,"description":playlist.desc}))
     json_result = json.loads(result.content)
     if ids:
         return add_songs(access_token,json_result["id"],ids)
@@ -227,7 +237,7 @@ def add_songs(access_token,id_playlist,ids):
     ids = list(divide_chunks(ids,100)) 
     for chunk in ids:
         uris = ["spotify:track:"+id for id in chunk]
-        result = post(url,headers=headers,data=json.dumps({"uris":uris}))
+        result = session.post(url,headers=headers,data=json.dumps({"uris":uris}))
     return result.status_code // 100 == 2
 
 """ Ordinamenti """

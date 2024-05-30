@@ -23,9 +23,11 @@
 
       <div class="d-flex container-xl px-3 ">
 
-        <div class="d-flex navbar-brand w-25" style="height: 5.5vh;">
-          <img class="img-fluid" src="{% static 'images/logo.png' %}" alt="Logo">
-          <img class="img-fluid" src="{% static 'images/testo_logo.png' %}" alt="Logo">
+        <div class="d-flex navbar-brand w-25 m-0 p-0" style="height: 5.5vh;">
+          <a href="{% url 'login' %}" class="h-100 m-0 p-0" style="text-decoration: none;">
+            <img class="img-fluid h-100 m-0 p-0" src="{% static 'images/logo.png' %}" alt="Logo">
+            <img class="img-fluid h-100 m-0 p-0" src="{% static 'images/testo_logo.png' %}" alt="Logo">
+          </a>
         </div>
 
         <ul class="d-flex navbar-nav ms-auto w-75 justify-content-end py-2 text-nowrap" style="overflow-x: clip;overflow-y: visible;">
