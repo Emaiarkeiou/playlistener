@@ -166,5 +166,3 @@ cython_debug/
 # Database
 *.sqlite3
 
-#immagini
-sito/media/
