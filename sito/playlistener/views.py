@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
@@ -87,8 +86,6 @@ def delete_song_related(sender, instance, **kwargs):
             break
     instance.artista.clear()
 
-code,verifier = "",""
-
 """
 
 GET PER I LINK/REDIRECT
@@ -100,14 +97,14 @@ POST PER LE FORM E BOTTONI SUBMIT(per input)
 
 @cache_control(must_revalidate=True, no_store=True)
 def loginView(request):
-    global code
     context={}
     if request.method == 'GET':
         """ GET della pagina di login """
         if request.user.is_authenticated:
             if request.GET.get('code'):
-                code = request.GET.get('code')
-                return redirect(loginSpotifyView,request.user.get_username())
+                response = redirect(loginSpotifyView,request.user.get_username())
+                response.set_cookie("code",request.GET.get('code'))
+                return response
             else:
                 return redirect(userView,request.user.get_username())
         else:
@@ -214,10 +211,10 @@ def editView(request):
 
 
 def logoutView(request):
-    global code
     response = redirect(loginView)
     if request.method == 'POST':
-        code = ""
+        response.delete_cookie("code")
+        response.delete_cookie("verifier")
         response.delete_cookie("access_token")
         response.delete_cookie("refresh_token")
         logout(request)
@@ -227,26 +224,26 @@ def logoutView(request):
 
 @cache_control(must_revalidate=True, no_store=True)
 def loginSpotifyView(request,username):
-    global code,verifier
     response = redirect(loginView)
     if request.method == 'GET':
         if request.user.is_authenticated:
             if request.user.get_username() == username:
+                code = request.COOKIES.get("code","")
                 print("code: "+code)
                 if not code:
                     verifier,querystring = redirectToAuthCodeFlow("http://"+urlparse(request.build_absolute_uri()).netloc+"/playlistener/login/")
-                    return redirect("https://accounts.spotify.com/authorize?"+querystring)
+                    response = redirect("https://accounts.spotify.com/authorize?"+querystring)
+                    response.set_cookie("verifier",verifier)
+                    return response
                 else:
-                    access_token,refresh_token = getAccessToken(code,verifier,"http://"+urlparse(request.build_absolute_uri()).netloc+"/playlistener/login/")
+                    access_token,refresh_token = getAccessToken(code,request.COOKIES.get("verifier",""),"http://"+urlparse(request.build_absolute_uri()).netloc+"/playlistener/login/")
                     response.set_cookie("access_token", access_token)
                     response.set_cookie("refresh_token", refresh_token)
-
     return response
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def userView(request,username,param="all"):
     """View function for home page of site."""
-    global code
     if request.user.is_authenticated:
         if request.user.get_username() == username:
             user = User.objects.get(username=username)
@@ -261,8 +258,9 @@ def userView(request,username,param="all"):
                         context["spotify_email"] = spotify_user["email"]
                     except:
                         print("ERRORE ACCESS_TOKEN")
-                        code = ""
                         response = redirect(loginSpotifyView,request.user.get_username())
+                        response.delete_cookie("code")
+                        response.delete_cookie("verifier")
                         response.delete_cookie("access_token")
                         response.delete_cookie("refresh_token")
                         return response
@@ -360,7 +358,6 @@ def scala_ordini(n,playlist):
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def playlistView(request,username,id=None,param="eff_energy",exported = False):
-    global code
     if request.user.is_authenticated:
         if request.user.get_username() == username:
             user = User.objects.get(username=username)
@@ -448,8 +445,9 @@ def playlistView(request,username,id=None,param="eff_energy",exported = False):
                                 return redirect(playlistView, username, id, param,resp)
                             except:
                                 print("ERRORE ACCESS_TOKEN Export")
-                                code = ""
                                 response = redirect(loginSpotifyView,request.user.get_username())
+                                response.delete_cookie("code")
+                                response.delete_cookie("verifier")
                                 response.delete_cookie("access_token")
                                 response.delete_cookie("refresh_token")
                                 return response

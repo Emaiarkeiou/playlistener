@@ -1,7 +1,6 @@
 import os
 import re
 import base64
-from requests import post,get,codes
 import json
 from difflib import SequenceMatcher
 import math
@@ -167,7 +166,7 @@ def get_album_first_tracks(album):
     """ Get informazioni base delle prime canzoni di 1 album """
     url = "https://api.spotify.com/v1/albums/" + album["id"] + "/tracks"
     headers = get_auth_header()
-    result = get(url,headers=headers)
+    result = session.get(url,headers=headers)
     json_result = json.loads(result.content)
     keys = ["id","name","duration_ms"]
     return list(map(lambda d: dict((k, d[k]) for k in keys if k in d)
