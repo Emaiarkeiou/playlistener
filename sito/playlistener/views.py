@@ -12,9 +12,6 @@ from django.conf import settings
 from .forms import *
 from PIL import Image
 
-import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 from .spotify import *
 from urllib.parse import urlparse
 
