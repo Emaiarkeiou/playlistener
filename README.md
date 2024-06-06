@@ -1,2 +1,2 @@
 # playlistener
-Local Library website written in Django
+Eseguire py manage.py migrate
